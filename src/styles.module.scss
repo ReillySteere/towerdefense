@@ -1,0 +1,22 @@
+$bg-color: #24252a;
+$border-color: #444;
+
+.container {
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.phaserContainer {
+  border: 2px solid $border-color;
+  margin-bottom: 20px;
+  width: 800px;
+  height: 600px; // Ensure it matches your Phaser canvas size
+}
+
+.uiOverlay {
+  width: 800px;
+  text-align: center;
+}
