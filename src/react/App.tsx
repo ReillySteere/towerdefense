@@ -1,15 +1,8 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import styles from './styles.module.scss';
-import './phaserGame';
 import { useGameStore } from './store';
-
-const fetchGreeting = async (): Promise<string> => {
-  // Simulate an API call with a delay.
-  return new Promise((resolve) =>
-    setTimeout(() => resolve('Hello from the API!'), 1000),
-  );
-};
+import { fetchGreeting } from '../api';
 
 const App = () => {
   const { score, incrementScore } = useGameStore();

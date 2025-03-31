@@ -11,7 +11,6 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
-    // Set a background color so we can see the canvas.
     this.cameras.main.setBackgroundColor('#24252A');
   }
 }
