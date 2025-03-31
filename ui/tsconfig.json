@@ -2,10 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "app/*": ["src/*"]
+      "frontend/*": ["src/*"]
     },
     "target": "es5",
-    "lib": ["dom", "es2015"],
+    "lib": ["dom", "ESNext"],
     "jsx": "react",
     "module": "commonjs",
     "moduleResolution": "node",
@@ -16,5 +16,5 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["jest", "@testing-library/jest-dom", "node", "@types/jest"]
   },
-  "include": ["src", "types"]
+  "include": ["src", "types", "jest.setup.js", "**/*.test.ts", "**/*.test.tsx"]
 }
