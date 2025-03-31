@@ -32,9 +32,11 @@ end_of_record
 TN:
 SF:src/react/App.tsx
 FN:7,(anonymous_1)
-FNF:1
+FN:32,(anonymous_2)
+FNF:2
 FNH:1
 FNDA:7,(anonymous_1)
+FNDA:0,(anonymous_2)
 DA:1,1
 DA:2,1
 DA:3,1
@@ -44,8 +46,9 @@ DA:7,1
 DA:8,7
 DA:9,7
 DA:14,7
-DA:35,1
-LF:10
+DA:33,0
+DA:42,1
+LF:11
 LH:10
 BRDA:21,0,0,5
 BRDA:21,0,1,2

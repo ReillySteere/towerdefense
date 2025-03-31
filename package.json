@@ -50,6 +50,7 @@
   "dependencies": {
     "@sentry/react": "^9.10.1",
     "@sentry/tracing": "^7.120.3",
+    "@sentry/webpack-plugin": "^3.2.4",
     "@tanstack/react-query": "^5.71.0",
     "phaser": "3.60",
     "react": "^19.1.0",

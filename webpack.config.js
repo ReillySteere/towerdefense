@@ -1,18 +1,25 @@
+const {
+  sentryWebpackPlugin
+} = require("@sentry/webpack-plugin");
+
 const path = require('path');
 
 module.exports = {
   mode: 'development',
   entry: './src/index.tsx',
+
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
+
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.module.scss'],
     alias: {
       app: path.resolve(__dirname, 'src'),
     },
   },
+
   module: {
     rules: [
       {
@@ -47,6 +54,7 @@ module.exports = {
       },
     ],
   },
+
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),
@@ -54,4 +62,12 @@ module.exports = {
     port: 8081,
     open: true,
   },
+
+  devtool: "source-map",
+
+  plugins: [sentryWebpackPlugin({
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    org: "freeland-f7",
+    project: "towerdefence"
+  })]
 };
