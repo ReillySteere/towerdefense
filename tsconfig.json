@@ -1,9 +1,18 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "backend/*": ["server/*"],
-      "frontend/*": ["ui/*"]
-    }
-  }
+    "target": "es5",
+    "lib": ["dom", "ESNext"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "exclude": ["node_modules", "dist"],
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "references": [
+    { "path": "./ui" },
+    { "path": "./server" },
+    { "path": "./shared" }
+  ]
 }
