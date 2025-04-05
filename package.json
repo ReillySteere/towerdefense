@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "ui",
-    "server"
+    "server",
+    "shared"
   ],
   "scripts": {
     "start": "concurrently \"npm run start --workspace=ui\" \"npm run start:dev --workspace=server\"",
