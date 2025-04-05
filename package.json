@@ -1,5 +1,6 @@
 {
   "name": "rise-of-the-machines",
+  "private": true,
   "workspaces": [
     "ui",
     "server"
