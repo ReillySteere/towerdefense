@@ -6,7 +6,7 @@
     "server"
   ],
   "scripts": {
-    "start": "concurrently \"npm run start --workspace=ui\" \"npm run start --workspace=server\"",
+    "start": "concurrently \"npm run start --workspace=ui\" \"npm run start:dev --workspace=server\"",
     "test": "concurrently \"npm run test --workspace=ui\" \"npm run test --workspace=server\""
   },
   "devDependencies": {

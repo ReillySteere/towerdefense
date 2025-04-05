@@ -1,4 +1,6 @@
-# Browser-Based Tower Defense Game
+# Rise of the AI Assistants
+
+Tower defense style game where you build progressively more powerful AIs to take over and eliminate increasingly more complex forms of human labour.
 
 ## Purpose
 
@@ -17,8 +19,7 @@ This project aims to develop a polished, browser-based tower defense game as a p
   Integrated for observability, Sentry will monitor game performance and capture runtime errors, ensuring robust error tracking and application health.
 
 - **React**  
-  Employed for building the user interface, React enables the creation of a responsive and dynamic front-end experience.
-
+  Employed for building the user interface
 - **NestJS**  
   Serves as the backend framework, offering a scalable and efficient architecture to handle game state, API requests, and potential multiplayer integration.
 
@@ -44,3 +45,51 @@ The project will be developed in incremental milestones, starting with the basic
 - **Asset Integration:** Placeholder graphics will be used initially, with the architecture designed to easily swap in high-quality assets as they become available.
 - **Multiplayer Expansion:** Although the initial focus is on single-player, the codebase will be structured to support multiplayer features with minimal refactoring.
 - **Performance Optimization:** Continuous profiling and optimization (e.g., efficient asset management and object pooling) will be employed to ensure smooth gameplay across all targeted browsers.
+
+Architecture Diagrams
+
+```pgsql
++----------------------------+
+|      Browser (Client)      |
+|----------------------------|
+|   React UI + Phaser 3      |
++-------------+--------------+
+              |
+              | RESTful API calls
+              V
++----------------------------+
+|      API Gateway (NestJS)  |
+|  (Backend RESTful Services)|
++-------------+--------------+
+              |
+              | TypeORM Integration
+              V
++----------------------------+
+|    SQLite Database         |
+| (Persistent Game Data,     |
+|  e.g., Enemies, Towers)    |
++----------------------------+
+```
+
+```pgsql
++----------------------------+
+|      Browser (Client)      |
+|----------------------------|
+|   React UI + Phaser 3      |
++-------------+--------------+
+              |
+              | RESTful API calls
+              V
++----------------------------+
+|      API Gateway (NestJS)  |
+|  (Backend RESTful Services)|
++-------------+--------------+
+              |
+              | TypeORM Integration
+              V
++----------------------------+
+|    SQLite Database         |
+| (Persistent Game Data,     |
+|  e.g., Enemies, Towers)    |
++----------------------------+
+```
