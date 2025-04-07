@@ -1,5 +1,5 @@
 module.exports = {
-  testRegex: ['./src/ui/react/.*test\\.[jt]s[x]*$'],
+  testRegex: ['./src/ui/.*test\\.[jt]s[x]*$'],
   preset: 'ts-jest/presets/js-with-ts-esm',
   transform: {
     '^.+\\.(ts|tsx)?$': [
@@ -27,8 +27,8 @@ module.exports = {
     url: 'http://jest',
   },
   collectCoverageFrom: [
-    'src/ui/react/**/*.ts',
-    'src/ui/react/**/*.tsx',
+    'src/ui/**/*.ts',
+    'src/ui/**/*.tsx',
     '!src/react/**/*.types.ts',
     '!**/node_modules/**',
   ],
