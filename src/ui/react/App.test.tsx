@@ -1,90 +1,58 @@
 import React from 'react';
-import { render, screen, fireEvent } from 'ui/react/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from 'ui/react/test-utils';
 import App from './App';
-import { useGameStore } from './store';
-import fetchHealth from 'ui/api/fetchHealth';
 
-jest.mock('./store', () => ({
-  useGameStore: jest.fn(),
-}));
-
-jest.mock('ui/api/fetchHealth');
-
-const mockedIncrementScore = jest.fn();
-
-const createQueryClient = () =>
-  new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+// Updated jest.mock to avoid referencing out-of-scope React
+jest.mock('./components/HealthStatus', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: function HealthStatusMock() {
+      return React.createElement(
+        'div',
+        { 'data-testid': 'health-status' },
+        'Health Status Mock',
+      );
+    },
+  };
+});
 
 describe('App Component', () => {
-  beforeEach(() => {
-    (useGameStore as unknown as jest.Mock).mockReturnValue({
-      score: 0,
-      incrementScore: mockedIncrementScore,
-    });
+  it('renders the main container with correct child elements', () => {
+    const { container } = render(<App />);
+    const mainContainer = container.querySelector('div');
+    expect(mainContainer).toBeInTheDocument();
   });
 
-  it('renders loading state initially', () => {
-    (fetchHealth as jest.Mock).mockReturnValue(new Promise(() => {})); // never resolves
-    render(
-      <QueryClientProvider client={createQueryClient()}>
-        <App />
-      </QueryClientProvider>,
-    );
-
-    expect(screen.getByText(/Loading health.../i)).toBeInTheDocument();
+  it('renders the phaser container with proper class', () => {
+    const { container } = render(<App />);
+    const phaserContainer = container.querySelector('#phaser-container');
+    expect(phaserContainer).toBeInTheDocument();
+    expect(phaserContainer).toHaveClass('phaserContainer');
   });
 
-  it('renders health after successful fetch', async () => {
-    (fetchHealth as jest.Mock).mockResolvedValue('Healthy API');
-    render(
-      <QueryClientProvider client={createQueryClient()}>
-        <App />
-      </QueryClientProvider>,
-    );
-
-    expect(await screen.findByText(/"Healthy API"/i)).toBeInTheDocument();
+  it('renders the UI overlay container with proper class', () => {
+    const { container } = render(<App />);
+    const uiOverlay = container.querySelector('#root-ui');
+    expect(uiOverlay).toBeInTheDocument();
+    expect(uiOverlay).toHaveClass('uiOverlay');
   });
 
-  it('handles fetch error correctly', async () => {
-    (fetchHealth as jest.Mock).mockRejectedValue(new Error('API Error'));
-    render(
-      <QueryClientProvider client={createQueryClient()}>
-        <App />
-      </QueryClientProvider>,
-    );
-
-    expect(
-      await screen.findByText(/Error fetching health/i),
-    ).toBeInTheDocument();
+  it('renders the HealthStatus component', () => {
+    render(<App />);
+    const healthStatus = screen.getByTestId('health-status');
+    expect(healthStatus).toBeInTheDocument();
+    expect(healthStatus).toHaveTextContent('Health Status Mock');
   });
 
-  it('increments score when button is clicked', () => {
-    (fetchHealth as jest.Mock).mockResolvedValue('Healthy API');
-    render(
-      <QueryClientProvider client={createQueryClient()}>
-        <App />
-      </QueryClientProvider>,
-    );
-
-    fireEvent.click(screen.getByText(/Increment Score/i));
-    expect(mockedIncrementScore).toHaveBeenCalled();
+  it('matches snapshot', () => {
+    const { container } = render(<App />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('displays score from store correctly', () => {
-    (useGameStore as unknown as jest.Mock).mockReturnValue({
-      score: 5,
-      incrementScore: mockedIncrementScore,
-    });
-    (fetchHealth as jest.Mock).mockResolvedValue('Healthy API');
-    render(
-      <QueryClientProvider client={createQueryClient()}>
-        <App />
-      </QueryClientProvider>,
-    );
-
-    expect(screen.getByText(/Score: 5/i)).toBeInTheDocument();
+  it('applies the proper container class on the root element', () => {
+    const { container } = render(<App />);
+    const rootElement = container.firstChild;
+    expect(rootElement).toHaveClass('container');
   });
 });

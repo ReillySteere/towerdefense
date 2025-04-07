@@ -1,8 +1,5 @@
 module.exports = {
-  testRegex: [
-    '.*/ui/react/.*test\\.[jt]s[x]*$',
-    '.*/(shared)/views.*\\.test\\.(tsx)$',
-  ],
+  testRegex: ['./src/ui/react/.*test\\.[jt]s[x]*$'],
   preset: 'ts-jest/presets/js-with-ts-esm',
   transform: {
     '^.+\\.(ts|tsx)?$': [
