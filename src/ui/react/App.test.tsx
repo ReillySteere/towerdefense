@@ -1,15 +1,15 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from 'ui/react/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { useGameStore } from './store';
-import * as api from '../api';
+import fetchHealth from 'ui/api/fetchHealth';
 
 jest.mock('./store', () => ({
   useGameStore: jest.fn(),
 }));
 
-jest.mock('../api');
+jest.mock('ui/api/fetchHealth');
 
 const mockedIncrementScore = jest.fn();
 
@@ -27,34 +27,29 @@ describe('App Component', () => {
   });
 
   it('renders loading state initially', () => {
-    (api.fetchGreeting as jest.Mock).mockReturnValue(new Promise(() => {})); // never resolves
-
+    (fetchHealth as jest.Mock).mockReturnValue(new Promise(() => {})); // never resolves
     render(
       <QueryClientProvider client={createQueryClient()}>
         <App />
       </QueryClientProvider>,
     );
 
-    expect(screen.getByText(/Loading greeting.../i)).toBeInTheDocument();
+    expect(screen.getByText(/Loading health.../i)).toBeInTheDocument();
   });
 
-  it('renders greeting after successful fetch', async () => {
-    (api.fetchGreeting as jest.Mock).mockResolvedValue('Hello from the API!');
-
+  it('renders health after successful fetch', async () => {
+    (fetchHealth as jest.Mock).mockResolvedValue('Healthy API');
     render(
       <QueryClientProvider client={createQueryClient()}>
         <App />
       </QueryClientProvider>,
     );
 
-    expect(
-      await screen.findByText(/"Hello from the API!"/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/"Healthy API"/i)).toBeInTheDocument();
   });
 
   it('handles fetch error correctly', async () => {
-    (api.fetchGreeting as jest.Mock).mockRejectedValue(new Error('API Error'));
-
+    (fetchHealth as jest.Mock).mockRejectedValue(new Error('API Error'));
     render(
       <QueryClientProvider client={createQueryClient()}>
         <App />
@@ -62,13 +57,12 @@ describe('App Component', () => {
     );
 
     expect(
-      await screen.findByText(/Error fetching greeting/i),
+      await screen.findByText(/Error fetching health/i),
     ).toBeInTheDocument();
   });
 
   it('increments score when button is clicked', () => {
-    (api.fetchGreeting as jest.Mock).mockResolvedValue('Hello from the API!');
-
+    (fetchHealth as jest.Mock).mockResolvedValue('Healthy API');
     render(
       <QueryClientProvider client={createQueryClient()}>
         <App />
@@ -76,7 +70,6 @@ describe('App Component', () => {
     );
 
     fireEvent.click(screen.getByText(/Increment Score/i));
-
     expect(mockedIncrementScore).toHaveBeenCalled();
   });
 
@@ -85,8 +78,7 @@ describe('App Component', () => {
       score: 5,
       incrementScore: mockedIncrementScore,
     });
-    (api.fetchGreeting as jest.Mock).mockResolvedValue('Hello from the API!');
-
+    (fetchHealth as jest.Mock).mockResolvedValue('Healthy API');
     render(
       <QueryClientProvider client={createQueryClient()}>
         <App />

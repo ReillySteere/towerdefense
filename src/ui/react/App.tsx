@@ -2,13 +2,13 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import styles from './styles.module.scss';
 import { useGameStore } from './store';
-import { fetchGreeting } from '../api';
+import fetchHealth from 'ui/api/fetchHealth';
 
 const App = () => {
   const { score, incrementScore } = useGameStore();
   const { data, isLoading, error } = useQuery({
-    queryKey: ['greeting'],
-    queryFn: fetchGreeting,
+    queryKey: ['health'],
+    queryFn: fetchHealth,
   });
 
   return (
@@ -19,9 +19,9 @@ const App = () => {
         <button onClick={incrementScore}>Increment Score</button>
         <p>
           {isLoading ? (
-            <span>'Loading greeting...'</span>
+            <span>'Loading health...'</span>
           ) : error ? (
-            <span>'Error fetching greeting'</span>
+            <span>'Error fetching health'</span>
           ) : (
             <span>{JSON.stringify(data)}</span>
           )}

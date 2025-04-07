@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './src/index.tsx',
+  entry: './src/ui/index.tsx',
 
   output: {
     filename: 'bundle.js',
@@ -14,7 +14,8 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.module.scss'],
     alias: {
-      frontend: path.resolve(__dirname, 'src'),
+      ui: path.resolve(__dirname, 'src/ui'),
+      shared: path.resolve(__dirname, 'src/shared'),
     },
   },
 
