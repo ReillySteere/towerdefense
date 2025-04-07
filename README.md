@@ -48,48 +48,36 @@ The project will be developed in incremental milestones, starting with the basic
 
 Architecture Diagrams
 
-```pgsql
-+----------------------------+
-|      Browser (Client)      |
-|----------------------------|
-|   React UI + Phaser 3      |
-+-------------+--------------+
-              |
-              | RESTful API calls
-              V
-+----------------------------+
-|      API Gateway (NestJS)  |
-|  (Backend RESTful Services)|
-+-------------+--------------+
-              |
-              | TypeORM Integration
-              V
-+----------------------------+
-|    SQLite Database         |
-| (Persistent Game Data,     |
-|  e.g., Enemies, Towers)    |
-+----------------------------+
-```
+graph TD;
+A[Browser (Client)]
+B[React UI + Phaser 3]
+C[NestJS API Gateway]
+D[TypeORM Integration]
+E[SQLite Database]
+F[Sentry (Observability)]
 
-```pgsql
-+----------------------------+
-|      Browser (Client)      |
-|----------------------------|
-|   React UI + Phaser 3      |
-+-------------+--------------+
-              |
-              | RESTful API calls
-              V
-+----------------------------+
-|      API Gateway (NestJS)  |
-|  (Backend RESTful Services)|
-+-------------+--------------+
-              |
-              | TypeORM Integration
-              V
-+----------------------------+
-|    SQLite Database         |
-| (Persistent Game Data,     |
-|  e.g., Enemies, Towers)    |
-+----------------------------+
-```
+    A -->|HTTP Requests| B;
+    B -->|RESTful API calls| C;
+    C -->|ORM Queries| D;
+    D --> E;
+    C --> F;
+    B --> F;
+
+graph TD;
+AppModule[AppModule]
+HealthModule[HealthModule]
+EnemyModule[EnemyModule]
+Enemy[Enemy Entity]
+HealthController[HealthController]
+EnemyService[Enemy Service]
+
+    AppModule --> HealthModule;
+    AppModule --> EnemyModule;
+    HealthModule --> HealthController;
+    EnemyModule --> EnemyService;
+    EnemyModule --> Enemy;
+    HealthController --> EnemyService;
+
+The Overall System Architecture diagram shows how the client (browser) interacts with the UI, which in turn communicates with the backend. The backend uses TypeORM to persist data in an SQLite database, and Sentry monitors the health of both frontend and backend.
+
+The Backend Detailed Architecture diagram focuses on NestJS modules: AppModule imports HealthModule and EnemyModule; the HealthController uses the EnemyService to access the Enemy entity through TypeORM.
