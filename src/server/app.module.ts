@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { Enemy } from './enemy/enemy.entity';
 import { HealthModule } from './health/health.module';
 import { EnemyModule } from './enemy/enemy.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { EnemyModule } from './enemy/enemy.module';
     }),
     EnemyModule,
     HealthModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
