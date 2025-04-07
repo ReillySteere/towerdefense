@@ -10,27 +10,81 @@ This project aims to develop a polished, browser-based tower defense game as a p
 - **Rapid Prototyping:** Use placeholder graphics to focus on gameplay mechanics before integrating final art assets.
 - **Showcase of Modern Technologies:** Demonstrate proficiency with current web development tools and best practices through incremental milestones and thorough testing.
 
-## Technologies Used
+## Project Setup Instructions
 
-- **Phaser 3**  
-  Used as the primary game engine, Phaser provides built-in support for rendering, asset management, game loops, physics, and animations—accelerating development and enforcing a solid structure.
+1. **Clone the repository:**
 
-- **Sentry**  
-  Integrated for observability, Sentry will monitor game performance and capture runtime errors, ensuring robust error tracking and application health.
+   ```bash
+   git clone <repository-url>
+   cd towerdefense
+   ```
 
-- **React**  
-  Employed for building the user interface
-- **NestJS**  
-  Serves as the backend framework, offering a scalable and efficient architecture to handle game state, API requests, and potential multiplayer integration.
+2. **Install dependencies:**
 
-- **TypeScript**  
-  The project’s primary language, TypeScript provides strong typing and enhanced code maintainability, making the codebase more reliable and easier to manage.
+   ```bash
+   yarn install
+   ```
 
-- **Jest**  
-  Utilized for unit testing, Jest ensures that individual components and modules function correctly, promoting code quality and reliability.
+3. **Build the project:**
 
-- **Cypress**  
-  Applied for integration testing, Cypress verifies the interactions between various parts of the application to ensure seamless overall functionality.
+   ```bash
+   yarn build
+   ```
+
+4. **Run the application:**
+
+   - **Development mode (UI + Server):**
+
+     ```bash
+     yarn start
+     ```
+
+   - **Production mode:**
+
+     ```bash
+     yarn start:server:prod
+     ```
+
+5. **Run tests:**
+
+   - **Unit Tests:**
+
+     ```bash
+     yarn test:ui && yarn test:server
+     ```
+
+   - **Cypress Integration Tests:**
+
+     ```bash
+     yarn cy:open
+     ```
+
+## Tooling and Stack Overview
+
+- **Game Engine:** Phaser 3 for rendering and game loop management.
+- **User Interface:** React coupled with modern CSS/SCSS for responsive design.
+- **Backend:** NestJS API Gateway with TypeORM integration using SQLite.
+- **Testing:** Jest for unit tests and Cypress for integration tests.
+- **Error Monitoring:** Sentry integrated for capturing runtime errors.
+- **Language:** TypeScript for type safety and maintainability.
+- **Bundling:** Webpack for building both client and server assets.
+
+## API Endpoint Documentation
+
+The API endpoints are documented using Swagger. Once the backend is running, you can access the API docs at:  
+[http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+
+## Initial Architecture Diagram
+
+Below is a simple diagram outlining the interactions between the frontend and backend:
+
+```mermaid
+graph TD;
+    A[Browser/Client] --> B[React UI + Phaser 3];
+    B --> C[NestJS API Gateway];
+    C --> D[SQLite Database];
+    C --> E[Sentry (Observability)];
+```
 
 ## Development Overview
 
@@ -45,39 +99,3 @@ The project will be developed in incremental milestones, starting with the basic
 - **Asset Integration:** Placeholder graphics will be used initially, with the architecture designed to easily swap in high-quality assets as they become available.
 - **Multiplayer Expansion:** Although the initial focus is on single-player, the codebase will be structured to support multiplayer features with minimal refactoring.
 - **Performance Optimization:** Continuous profiling and optimization (e.g., efficient asset management and object pooling) will be employed to ensure smooth gameplay across all targeted browsers.
-
-Architecture Diagrams
-
-graph TD;
-A[Browser (Client)]
-B[React UI + Phaser 3]
-C[NestJS API Gateway]
-D[TypeORM Integration]
-E[SQLite Database]
-F[Sentry (Observability)]
-
-    A -->|HTTP Requests| B;
-    B -->|RESTful API calls| C;
-    C -->|ORM Queries| D;
-    D --> E;
-    C --> F;
-    B --> F;
-
-graph TD;
-AppModule[AppModule]
-HealthModule[HealthModule]
-EnemyModule[EnemyModule]
-Enemy[Enemy Entity]
-HealthController[HealthController]
-EnemyService[Enemy Service]
-
-    AppModule --> HealthModule;
-    AppModule --> EnemyModule;
-    HealthModule --> HealthController;
-    EnemyModule --> EnemyService;
-    EnemyModule --> Enemy;
-    HealthController --> EnemyService;
-
-The Overall System Architecture diagram shows how the client (browser) interacts with the UI, which in turn communicates with the backend. The backend uses TypeORM to persist data in an SQLite database, and Sentry monitors the health of both frontend and backend.
-
-The Backend Detailed Architecture diagram focuses on NestJS modules: AppModule imports HealthModule and EnemyModule; the HealthController uses the EnemyService to access the Enemy entity through TypeORM.
