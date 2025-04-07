@@ -6,6 +6,7 @@ import { Enemy } from './enemy/enemy.entity';
 import { HealthModule } from './health/health.module';
 import { EnemyModule } from './enemy/enemy.module';
 import { AuthModule } from './auth/auth.module';
+import { WaypointModule } from './waypoint/waypoint.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
     EnemyModule,
     HealthModule,
     AuthModule,
+    WaypointModule,
   ],
   controllers: [AppController],
   providers: [AppService],
