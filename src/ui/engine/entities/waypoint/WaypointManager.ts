@@ -1,49 +1,37 @@
+// File: src/entities/waypoint/WaypointManager.ts
 import { IWaypoint } from './IWaypoint';
 
 /**
- * WaypointManager is responsible for managing a set of waypoints.
- * It provides methods to add, remove, update, and retrieve waypoints.
+ * WaypointManager is responsible for managing a set of waypoints in grid coordinates.
+ * For instance, converting pixels with GRID_SIZE = 20:
+ *   - (300, 0) -> (15, 0)
+ *   - (250, 450) -> (13, 23)
+ *   - (500, 600) -> (25, 30)
  */
 export class WaypointManager {
   private waypoints: IWaypoint[];
 
   constructor(initialWaypoints?: IWaypoint[]) {
-    // Use provided initial waypoints or default demonstration values.
+    // Use provided initial waypoints or default demonstration values (in integer grid coordinates)
     this.waypoints = initialWaypoints || [
-      { x: 300, y: 0 },
-      { x: 250, y: 450 },
-      { x: 500, y: 600 },
+      { x: 15, y: 0 },
+      { x: 13, y: 23 },
+      { x: 25, y: 30 },
     ];
   }
 
-  /**
-   * Returns all waypoints.
-   */
   public getWaypoints(): IWaypoint[] {
     return this.waypoints;
   }
 
-  /**
-   * Returns a waypoint by index.
-   * @param index - Index of the waypoint.
-   */
   public getWaypoint(index: number): IWaypoint | undefined {
     return this.waypoints[index];
   }
 
-  /**
-   * Adds a new waypoint.
-   * @param waypoint - The waypoint to add.
-   */
   public addWaypoint(waypoint: IWaypoint): void {
     this.waypoints.push(waypoint);
   }
 
-  /**
-   * Updates an existing waypoint.
-   * @param index - Index of the waypoint to update.
-   * @param newWaypoint - New waypoint data.
-   */
   public updateWaypoint(index: number, newWaypoint: IWaypoint): void {
     if (index >= 0 && index < this.waypoints.length) {
       this.waypoints[index] = newWaypoint;
@@ -52,10 +40,6 @@ export class WaypointManager {
     }
   }
 
-  /**
-   * Removes a waypoint by index.
-   * @param index - Index of the waypoint to remove.
-   */
   public removeWaypoint(index: number): void {
     if (index >= 0 && index < this.waypoints.length) {
       this.waypoints.splice(index, 1);
