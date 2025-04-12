@@ -10,6 +10,44 @@ interface INode extends IGridPosition {
   parent?: INode;
 }
 
+function getEnemyPenaltyForCell(
+  cell: IGridPosition,
+  enemyPositions: Set<string>,
+  penaltyPerEnemy: number = 3, // Adjust this value as necessary
+): number {
+  let penalty = 0;
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      // Skip the current cell itself.
+      if (dx === 0 && dy === 0) continue;
+      const adjacentKey = `${cell.x + dx},${cell.y + dy}`;
+      if (enemyPositions.has(adjacentKey)) {
+        penalty += penaltyPerEnemy;
+      }
+    }
+  }
+  return penalty;
+}
+
+function getPenaltyForCell(
+  cell: IGridPosition,
+  obstacles: Set<string>,
+  penaltyPerNeighbor: number = 2, // arbitrary penalty value
+): number {
+  let penalty = 0;
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      // Skip checking the cell itself.
+      if (dx === 0 && dy === 0) continue;
+      const adjacentKey = `${cell.x + dx},${cell.y + dy}`;
+      if (obstacles.has(adjacentKey)) {
+        penalty += penaltyPerNeighbor;
+      }
+    }
+  }
+  return penalty;
+}
+
 function heuristic(a: IGridPosition, b: IGridPosition): number {
   // Manhattan distance heuristic.
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -66,6 +104,7 @@ export function findPath(
   gridWidth: number,
   gridHeight: number,
   obstacles: Set<string>,
+  enemyPositions?: Set<string>,
 ): IGridPosition[] | null {
   const openList: INode[] = [];
   const closedSet: Set<string> = new Set();
@@ -138,8 +177,15 @@ export function findPath(
       if (obstacles.has(neighborKey) || closedSet.has(neighborKey)) {
         continue;
       }
-      const cost = dir.x === 0 || dir.y === 0 ? 1 : Math.SQRT2;
+      // Calculate cost of specific nodes - this is where we modify how appealing a particular node is
+      const baseCost = dir.x === 0 || dir.y === 0 ? 1 : Math.SQRT2;
+      const towerPenalty = getPenaltyForCell(neighbor, obstacles, 2); // adjust penalty value as needed
+      const enemyPenalty = enemyPositions
+        ? getEnemyPenaltyForCell(neighbor, enemyPositions, 3)
+        : 0;
+      const cost = baseCost + towerPenalty + enemyPenalty;
       const tentativeG = currentNode.g + cost;
+
       let neighborNode = openList.find(
         (n) => n.x === neighbor.x && n.y === neighbor.y,
       );

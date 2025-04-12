@@ -16,7 +16,7 @@ export class WaypointManager {
     this.waypoints = initialWaypoints || [
       { x: 15, y: 0 },
       { x: 13, y: 23 },
-      { x: 25, y: 30 },
+      { x: 25, y: 25 },
     ];
   }
 

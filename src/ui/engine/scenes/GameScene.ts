@@ -67,8 +67,13 @@ export class GameScene extends Phaser.Scene {
 
       // Create a new Tower using grid coordinates.
       const newTower = new Tower(gridX, gridY);
-      // TowerManager will update the GameGrid accordingly.
-      const added = this.towerManager.addTower(newTower);
+      // TowerManager will check placement against occupancy and path validity.
+      const added = this.towerManager.addTower(
+        newTower,
+        CANVAS_WIDTH,
+        CANVAS_HEIGHT,
+        this.waypointManager,
+      );
 
       if (!added) {
         this.debugErrorMessage =
@@ -90,6 +95,53 @@ export class GameScene extends Phaser.Scene {
 
   update(time: number, delta: number): void {
     this.enemyManager.update(delta);
+    // Update towers firing logic.
+    const towers = this.towerManager.getTowers();
+    const enemies = this.enemyManager.getEnemies();
+    const currentTime = this.time.now;
+    towers.forEach((tower: Tower) => {
+      enemies.forEach((enemy) => {
+        // Call the tower update with enemy, current time and grid size.
+        const projectile = tower.update(enemy, currentTime, GRID_SIZE);
+        if (projectile) {
+          console.log(`[GameScene] Tower fired at enemy ${enemy.name}`);
+          this.projectiles.push(projectile);
+        }
+      });
+    });
+
+    this.projectiles = this.projectiles.filter((projectile) => {
+      // Update the projectile's position.
+      projectile.update(delta);
+
+      // Check each enemy for a collision.
+      enemies.forEach((enemy) => {
+        // Convert enemy's grid position to pixel coordinates.
+        const enemyPixelPos = {
+          x: enemy.x * GRID_SIZE + GRID_SIZE / 2,
+          y: enemy.y * GRID_SIZE + GRID_SIZE / 2,
+        };
+
+        const dx = projectile.x - enemyPixelPos.x;
+        const dy = projectile.y - enemyPixelPos.y;
+        const distance = Math.hypot(dx, dy);
+        // Use a threshold: sum of projectile radius and enemy visual radius (assumed to be 10 pixels).
+        if (distance < projectile.radius + 10) {
+          // Reduce enemy health by the projectile's damage.
+          enemy.health -= projectile.damage;
+          console.log(
+            `[GameScene] Enemy ${enemy.name} hit! New health: ${enemy.health}`,
+          );
+          // Mark projectile as inactive.
+          projectile.isActive = false;
+        }
+      });
+
+      return projectile.isActive;
+    });
+
+    this.enemyManager.removeDeadEnemies();
+
     this.drawScene();
     this.updateDebugHUD();
   }
@@ -153,8 +205,18 @@ export class GameScene extends Phaser.Scene {
       this.enemyGraphics.fillCircle(enemyPixelPos.x, enemyPixelPos.y, 10);
     });
 
-    // Draw towers.
-    this.towerManager.draw(this.enemyGraphics);
+    this.projectiles.forEach((projectile) => {
+      // Use a distinct color for projectiles (e.g., orange).
+      this.enemyGraphics.fillStyle(0xffa500, 1);
+      this.enemyGraphics.fillCircle(
+        projectile.x,
+        projectile.y,
+        projectile.radius,
+      );
+    });
+
+    // Draw towers, passing the current grid size.
+    this.towerManager.draw(this.enemyGraphics, GRID_SIZE);
   }
 
   /**
@@ -164,11 +226,11 @@ export class GameScene extends Phaser.Scene {
     let debugInfo = '';
     this.enemyManager.getEnemies().forEach((enemy, index) => {
       debugInfo += `Enemy ${index + 1}: ${enemy.name}\n`;
+
+      debugInfo += `  Health: ${enemy.health}\n`;
       debugInfo += `  Pos (grid): (${enemy.x.toFixed(2)}, ${enemy.y.toFixed(2)})\n`;
       debugInfo += `  WP Index: ${enemy.currentWaypointIndex}/${enemy.currentWaypoints.length - 1}\n`;
-      debugInfo += `  Next Orig Target: (${enemy
-        .getNextOriginalTarget()
-        .x.toFixed(2)}, ${enemy.getNextOriginalTarget().y.toFixed(2)})\n`;
+      debugInfo += `  Next Orig Target: (${enemy.getNextOriginalTarget().x.toFixed(2)}, ${enemy.getNextOriginalTarget().y.toFixed(2)})\n`;
       debugInfo += `  Current Path: ${enemy.currentWaypoints
         .map((w) => `(${w.x.toFixed(2)}, ${w.y.toFixed(2)})`)
         .join(' -> ')}\n`;
