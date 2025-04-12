@@ -10,9 +10,9 @@ export class WaypointManager {
   constructor(initialWaypoints?: IWaypoint[]) {
     // Use provided initial waypoints or default demonstration values.
     this.waypoints = initialWaypoints || [
-      { x: 0, y: 0 },
-      { x: 100, y: 100 },
-      { x: 200, y: 0 },
+      { x: 300, y: 0 },
+      { x: 250, y: 450 },
+      { x: 500, y: 600 },
     ];
   }
 
