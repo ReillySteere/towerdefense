@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
-import { GameManager, HUDManager } from '../managers';
+import { GameManager } from '../managers';
 
 export class GameScene extends Phaser.Scene {
   #gameManager: GameManager;
-  #hudManager: HUDManager;
-
   #graphics: Phaser.GameObjects.Graphics;
+
   constructor() {
     super({ key: 'GameScene' });
   }
@@ -20,12 +19,11 @@ export class GameScene extends Phaser.Scene {
     this.#graphics = this.add.graphics();
 
     this.cameras.main.setBackgroundColor('#242424');
-
-    this.#hudManager = new HUDManager(this);
   }
 
   update(_time: number, delta: number): void {
     this.#gameManager.update(delta, this.#graphics);
-    this.#hudManager.update();
+    const fps = Math.round(1000 / delta);
+    this.events.emit('updateFPS', fps);
   }
 }

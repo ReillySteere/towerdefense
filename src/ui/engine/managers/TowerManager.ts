@@ -1,7 +1,5 @@
 import { Tower } from '../entities/tower/Tower';
 import { GameGrid } from '../core/GameGrid';
-import { WaypointManager } from '../entities/waypoint/WaypointManager';
-import { EventBus } from '../events/EventBus';
 import {
   PathPlanningService,
   type IGridPosition,
@@ -12,34 +10,35 @@ import { IWaypoint } from '../entities/waypoint/IWaypoint';
 interface TowerManagerProps {
   gameGrid: GameGrid;
   pathPlanningService: PathPlanningService;
+  scene: Phaser.Scene;
 }
 class TowerManager {
   #gameGrid: GameGrid;
   #pathPlanningService: PathPlanningService;
-  private towers: Tower[] = [];
+  #scene: Phaser.Scene;
 
-  constructor({ gameGrid, pathPlanningService }: TowerManagerProps) {
+  #towers: Tower[] = [];
+
+  constructor({ gameGrid, pathPlanningService, scene }: TowerManagerProps) {
     this.#gameGrid = gameGrid;
     this.#pathPlanningService = pathPlanningService;
+    this.#scene = scene;
   }
 
   /**
    * Check if a tower already exists at (x, y).
    */
   hasTowerAt(x: number, y: number): boolean {
-    return this.towers.some((tower) => tower.x === x && tower.y === y);
+    return this.#towers.some((tower) => tower.x === x && tower.y === y);
   }
 
-  getTowers(): Tower[] {
-    return this.towers;
-  }
   /**
    * Return a list of obstacles from both towers and the grid.
    */
   getObstacleSet(): Set<string> {
     const obstacles = new Set<string>();
     // Add tower positions as obstacles.
-    this.towers.forEach((tower) => {
+    this.#towers.forEach((tower) => {
       obstacles.add(`${tower.x},${tower.y}`);
     });
     // Also include any obstacles already set in the grid.
@@ -114,7 +113,7 @@ class TowerManager {
     const newTower = new Tower(gridX, gridY);
 
     if (!this.canPlaceTower(baseRoute, newTower)) {
-      EventBus.getInstance().publish('debugError', {
+      this.#scene.events.emit('debugError', {
         message:
           'Invalid tower placement: either already placed or blocking access.',
         source: 'TowerManager',
@@ -124,11 +123,11 @@ class TowerManager {
 
     // Mark grid cell as occupied.
     this.#gameGrid.setCellOccupancy(newTower.x, newTower.y, true);
-    this.towers.push(newTower);
+    this.#towers.push(newTower);
 
     // Update obstacles and notify other systems.
     const obstacles = this.getObstacleSet();
-    EventBus.getInstance().publish('obstaclesUpdated', { obstacles });
+    this.#scene.events.emit('obstaclesUpdated', { obstacles });
 
     return true;
   }
@@ -147,7 +146,7 @@ class TowerManager {
     enemies: any[],
   ): Projectile[] {
     const projectiles: Projectile[] = [];
-    this.towers.forEach((tower) => {
+    this.#towers.forEach((tower) => {
       enemies.forEach((enemy) => {
         const projectile = tower.update(enemy, currentTime, gridSize);
         if (projectile) {
@@ -161,7 +160,7 @@ class TowerManager {
    * Render towers.
    */
   draw(graphics: Phaser.GameObjects.Graphics): void {
-    this.towers.forEach((tower) => {
+    this.#towers.forEach((tower) => {
       graphics.fillStyle(0x0000ff, 1);
       const { pixelX, pixelY } = this.#gameGrid.gridToPixel(tower.x, tower.y);
       graphics.fillRect(

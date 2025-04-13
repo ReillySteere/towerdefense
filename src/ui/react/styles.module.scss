@@ -2,11 +2,12 @@ $bg-color: #24252a;
 $border-color: #444;
 
 .container {
-  margin: 0;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: #222;
+  min-height: 100vh;
+  padding: 20px;
 }
 
 .phaserContainer {

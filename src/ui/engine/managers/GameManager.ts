@@ -1,7 +1,6 @@
 import { GameGrid } from '../core/GameGrid';
 import { Projectile } from '../entities/tower/Projectile';
 import { WaypointManager } from '../entities/waypoint/WaypointManager';
-import { EventBus } from '../events/EventBus';
 import { PathPlanningService } from '../services/PathPlanningService';
 import { RendererService } from '../services/RendererService';
 import EnemyManager from './EnemyManager';
@@ -35,11 +34,12 @@ class GameManager {
     this.#towerManager = new TowerManager({
       gameGrid: this.#gameGrid,
       pathPlanningService: this.#pathPlanningService,
+      scene,
     });
 
     this.#waypointManager = new WaypointManager();
 
-    EventBus.getInstance().subscribe('obstaclesUpdated', () => {
+    scene.events.on('obstaclesUpdated', () => {
       const obstacles = this.#gameGrid.getObstacles();
       this.#enemyManager.reRouteAllEnemies({ obstacles });
     });
@@ -56,6 +56,11 @@ class GameManager {
         gridX,
         gridY,
       });
+
+      this.#scene.events.emit('debugError', {
+        message: `Tower added at (${gridX}, ${gridY})`,
+        source: 'GameManager',
+      });
     });
 
     // New wave trigger on key "N".
@@ -68,6 +73,7 @@ class GameManager {
         obstacles: this.#gameGrid.getObstacles(),
       });
       this.#waveCount++;
+      this.#scene.events.emit('waveUpdate', this.#waveCount);
     });
   }
 

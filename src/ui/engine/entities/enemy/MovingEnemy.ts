@@ -18,6 +18,13 @@ export class MovingEnemy {
   // For debugging: store the most recent re-route segment.
   public lastRerouteSegment: IWaypoint[] = [];
 
+  /**
+   *
+   * @param name
+   * @param health
+   * @param waypoints
+   * @param speed - grid-cells per millisecond
+   */
   constructor(
     name: string,
     health: number,
