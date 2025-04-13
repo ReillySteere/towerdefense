@@ -16,7 +16,7 @@ export class Projectile {
    * @param x - The starting x-coordinate in pixels.
    * @param y - The starting y-coordinate in pixels.
    * @param target - The target enemy.
-   * @param speed - The projectile speed.
+   * @param speed - The projectile speed - grid-cells per millisecond .
    * @param gridSize - The size of one grid cell in pixels.
    */
   constructor(

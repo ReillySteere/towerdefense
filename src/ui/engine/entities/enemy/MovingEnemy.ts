@@ -1,6 +1,5 @@
-// File: src/entities/enemy/MovingEnemy.ts
+import { PathPlanningService } from 'ui/engine/services/PathPlanningService';
 import { IWaypoint } from '../../entities/waypoint/IWaypoint';
-import { getLine } from '../../utilities/PathFinder';
 
 export class MovingEnemy {
   public name: string;
@@ -23,7 +22,7 @@ export class MovingEnemy {
     name: string,
     health: number,
     waypoints: IWaypoint[], // All waypoints in grid coordinates
-    speed: number = 0.001,
+    speed: number = 0.01,
   ) {
     if (waypoints.length === 0) {
       throw new Error('MovingEnemy must have at least one waypoint');
@@ -124,7 +123,7 @@ export class MovingEnemy {
     }
     const currentGrid = { x: Math.floor(this.x), y: Math.floor(this.y) };
     const nextWaypoint = this.currentWaypoints[this.currentWaypointIndex + 1];
-    const line = getLine(currentGrid, nextWaypoint);
+    const line = PathPlanningService.getLine(currentGrid, nextWaypoint);
     return line.some((cell) => obstacles.has(`${cell.x},${cell.y}`));
   }
 

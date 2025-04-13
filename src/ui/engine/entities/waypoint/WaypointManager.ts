@@ -1,13 +1,5 @@
-// File: src/entities/waypoint/WaypointManager.ts
 import { IWaypoint } from './IWaypoint';
 
-/**
- * WaypointManager is responsible for managing a set of waypoints in grid coordinates.
- * For instance, converting pixels with GRID_SIZE = 20:
- *   - (300, 0) -> (15, 0)
- *   - (250, 450) -> (13, 23)
- *   - (500, 600) -> (25, 30)
- */
 export class WaypointManager {
   private waypoints: IWaypoint[];
 

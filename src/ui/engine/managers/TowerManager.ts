@@ -2,12 +2,26 @@ import { Tower } from '../entities/tower/Tower';
 import { GameGrid } from '../core/GameGrid';
 import { WaypointManager } from '../entities/waypoint/WaypointManager';
 import { EventBus } from '../events/EventBus';
-import { findPath, IGridPosition } from '../utilities/PathFinder';
+import {
+  PathPlanningService,
+  type IGridPosition,
+} from '../services/PathPlanningService';
+import { Projectile } from '../entities/tower/Projectile';
+import { IWaypoint } from '../entities/waypoint/IWaypoint';
 
-export class TowerManager {
+interface TowerManagerProps {
+  gameGrid: GameGrid;
+  pathPlanningService: PathPlanningService;
+}
+class TowerManager {
+  #gameGrid: GameGrid;
+  #pathPlanningService: PathPlanningService;
   private towers: Tower[] = [];
 
-  constructor(private grid: GameGrid) {}
+  constructor({ gameGrid, pathPlanningService }: TowerManagerProps) {
+    this.#gameGrid = gameGrid;
+    this.#pathPlanningService = pathPlanningService;
+  }
 
   /**
    * Check if a tower already exists at (x, y).
@@ -29,7 +43,7 @@ export class TowerManager {
       obstacles.add(`${tower.x},${tower.y}`);
     });
     // Also include any obstacles already set in the grid.
-    this.grid.getObstacles().forEach((key) => obstacles.add(key));
+    this.#gameGrid.getObstacles().forEach((key) => obstacles.add(key));
     return obstacles;
   }
 
@@ -38,15 +52,10 @@ export class TowerManager {
    * - The target cell must not be already occupied.
    * - The candidate should not block any necessary path between waypoints.
    */
-  public canPlaceTower(
-    candidateTower: Tower,
-    canvasWidth: number,
-    canvasHeight: number,
-    waypointManager: WaypointManager,
-  ): boolean {
+  public canPlaceTower(baseRoute: IWaypoint[], candidateTower: Tower): boolean {
     // Reject if the grid cell is already occupied, either by a tower or a grid obstacle.
     if (
-      this.grid.isCellOccupied(candidateTower.x, candidateTower.y) ||
+      this.#gameGrid.isCellOccupied(candidateTower.x, candidateTower.y) ||
       this.hasTowerAt(candidateTower.x, candidateTower.y)
     ) {
       return false;
@@ -56,9 +65,6 @@ export class TowerManager {
     const candidateObstacles = this.getObstacleSet();
     candidateObstacles.add(`${candidateTower.x},${candidateTower.y}`);
 
-    const gridWidth = canvasWidth / 20;
-    const gridHeight = canvasHeight / 20;
-    const baseRoute = waypointManager.getWaypoints();
     if (baseRoute.length < 2) {
       return false;
     }
@@ -66,22 +72,21 @@ export class TowerManager {
     // Validate the route between each pair of consecutive waypoints.
     for (let i = 0; i < baseRoute.length - 1; i++) {
       const startGrid: IGridPosition = {
-        x: Math.min(baseRoute[i].x, gridWidth - 1),
-        y: Math.min(baseRoute[i].y, gridHeight - 1),
+        x: Math.min(baseRoute[i].x, this.#gameGrid.width - 1),
+        y: Math.min(baseRoute[i].y, this.#gameGrid.height - 1),
       };
       const endGrid: IGridPosition = {
-        x: Math.min(baseRoute[i + 1].x, gridWidth - 1),
-        y: Math.min(baseRoute[i + 1].y, gridHeight - 1),
+        x: Math.min(baseRoute[i + 1].x, this.#gameGrid.width - 1),
+        y: Math.min(baseRoute[i + 1].y, this.#gameGrid.height - 1),
       };
 
-      const path = findPath(
+      const newPath = this.#pathPlanningService.computePath(
         startGrid,
         endGrid,
-        gridWidth,
-        gridHeight,
         candidateObstacles,
       );
-      if (!path || path.length === 0) {
+
+      if (!newPath || newPath.length === 0) {
         console.warn(
           `[TowerManager] Tower candidate at (${candidateTower.x}, ${candidateTower.y}) blocks the path between (${startGrid.x}, ${startGrid.y}) and (${endGrid.x}, ${endGrid.y}).`,
         );
@@ -97,21 +102,29 @@ export class TowerManager {
    * - Mark the grid cell as occupied.
    * - Publish an event to trigger re-routing of enemies.
    */
-  addTower(
-    tower: Tower,
-    canvasWidth: number,
-    canvasHeight: number,
-    waypointManager: WaypointManager,
-  ): boolean {
-    if (
-      !this.canPlaceTower(tower, canvasWidth, canvasHeight, waypointManager)
-    ) {
+  addTower({
+    baseRoute,
+    gridX,
+    gridY,
+  }: {
+    baseRoute: IWaypoint[];
+    gridX: number;
+    gridY: number;
+  }): boolean {
+    const newTower = new Tower(gridX, gridY);
+
+    if (!this.canPlaceTower(baseRoute, newTower)) {
+      EventBus.getInstance().publish('debugError', {
+        message:
+          'Invalid tower placement: either already placed or blocking access.',
+        source: 'TowerManager',
+      });
       return false;
     }
 
     // Mark grid cell as occupied.
-    this.grid.setCellOccupancy(tower.x, tower.y, true);
-    this.towers.push(tower);
+    this.#gameGrid.setCellOccupancy(newTower.x, newTower.y, true);
+    this.towers.push(newTower);
 
     // Update obstacles and notify other systems.
     const obstacles = this.getObstacleSet();
@@ -121,13 +134,36 @@ export class TowerManager {
   }
 
   /**
+   * Iterates over all towers and updates them with the given enemies.
+   * Returns an array of projectiles generated by towers.
+   *
+   * @param currentTime - The current time in milliseconds.
+   * @param gridSize - The size (in pixels) of a grid cell.
+   * @param enemies - An array of enemies in the game.
+   */
+  public updateTowers(
+    currentTime: number,
+    gridSize: number,
+    enemies: any[],
+  ): Projectile[] {
+    const projectiles: Projectile[] = [];
+    this.towers.forEach((tower) => {
+      enemies.forEach((enemy) => {
+        const projectile = tower.update(enemy, currentTime, gridSize);
+        if (projectile) {
+          projectiles.push(projectile);
+        }
+      });
+    });
+    return projectiles;
+  }
+  /**
    * Render towers.
    */
-  draw(graphics: Phaser.GameObjects.Graphics, gridSize: number): void {
+  draw(graphics: Phaser.GameObjects.Graphics): void {
     this.towers.forEach((tower) => {
       graphics.fillStyle(0x0000ff, 1);
-      const pixelX = tower.x * gridSize + gridSize / 2;
-      const pixelY = tower.y * gridSize + gridSize / 2;
+      const { pixelX, pixelY } = this.#gameGrid.gridToPixel(tower.x, tower.y);
       graphics.fillRect(
         pixelX - tower.size / 2,
         pixelY - tower.size / 2,
@@ -137,3 +173,5 @@ export class TowerManager {
     });
   }
 }
+
+export default TowerManager;

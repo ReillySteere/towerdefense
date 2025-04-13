@@ -51,7 +51,6 @@ export class Tower {
       currentTime - this.lastFired >= this.firingRate
     ) {
       this.lastFired = currentTime;
-      console.log(`[Tower] Firing projectile at enemy ${enemy.name}`);
       return this.fireProjectile(enemy, gridSize);
     }
     return null;
@@ -71,7 +70,7 @@ export class Tower {
       towerPos.pixelX,
       towerPos.pixelY,
       enemy,
-      0.5,
+      0.7,
       gridSize,
     );
   }

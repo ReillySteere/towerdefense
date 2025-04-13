@@ -1,10 +1,10 @@
-// File: src/managers/EnemyManager.ts
-import { MovingEnemy } from '../entities/enemy/MovingEnemy';
-import { WaypointManager } from '../entities/waypoint/WaypointManager';
-import { findPath, IGridPosition, getLine } from '../utilities/PathFinder';
 import { GameGrid } from '../core/GameGrid';
-import { EventBus } from '../events/EventBus';
+import { MovingEnemy } from '../entities/enemy/MovingEnemy';
 import { IWaypoint } from '../entities/waypoint/IWaypoint';
+import {
+  PathPlanningService,
+  type IGridPosition,
+} from '../services/PathPlanningService';
 
 // Helper function to compare two routes.
 function routesAreEqual(
@@ -26,21 +26,22 @@ function routesAreEqual(
   return true;
 }
 
-export class EnemyManager {
-  private enemies: MovingEnemy[] = [];
-  private waypointManager: WaypointManager;
-  private gameGrid: GameGrid;
+interface EnemyManagerProps {
+  gameGrid: GameGrid;
+  pathPlanningService: PathPlanningService;
+}
+class EnemyManager {
+  #enemies: MovingEnemy[] = [];
+  #gameGrid: GameGrid;
+  #pathPlanningService: PathPlanningService;
 
-  constructor(waypointManager: WaypointManager, gameGrid: GameGrid) {
-    this.waypointManager = waypointManager;
-    this.gameGrid = gameGrid;
-    EventBus.getInstance().subscribe('obstaclesUpdated', () => {
-      this.reRouteAllEnemies();
-    });
+  constructor({ gameGrid, pathPlanningService }: EnemyManagerProps) {
+    this.#gameGrid = gameGrid;
+    this.#pathPlanningService = pathPlanningService;
   }
 
   public getEnemies(): MovingEnemy[] {
-    return this.enemies;
+    return this.#enemies;
   }
 
   /**
@@ -58,7 +59,7 @@ export class EnemyManager {
   ): IGridPosition[] | null {
     // Build a set of positions (in "x,y" format) for all other enemies.
     const enemyPositions = new Set<string>();
-    this.enemies.forEach((otherEnemy) => {
+    this.#enemies.forEach((otherEnemy) => {
       if (otherEnemy !== enemy) {
         const key = `${Math.floor(otherEnemy.x)},${Math.floor(otherEnemy.y)}`;
         enemyPositions.add(key);
@@ -78,19 +79,17 @@ export class EnemyManager {
       y: targetWaypoint.y,
     };
 
-    return findPath(
+    return this.#pathPlanningService.computePath(
       enemyGrid,
       targetGrid,
-      this.gameGrid.width,
-      this.gameGrid.height,
       obstacles,
-      enemyPositions, // This extra parameter will let findPath add penalty for enemy stacking.
+      enemyPositions,
+      undefined, // Optionally, you could pass in tower positions here.
     );
   }
 
-  public update(delta: number): void {
-    const obstacles = this.gameGrid.getObstacles();
-    this.enemies.forEach((enemy) => {
+  public update(delta: number, obstacles: Set<string>): void {
+    this.#enemies.forEach((enemy) => {
       enemy.update(delta);
 
       // If the enemy's current segment is blocked...
@@ -121,9 +120,8 @@ export class EnemyManager {
     });
   }
 
-  public reRouteAllEnemies(): void {
-    const obstacles = this.gameGrid.getObstacles();
-    this.enemies.forEach((enemy) => {
+  public reRouteAllEnemies({ obstacles }: { obstacles: Set<string> }): void {
+    this.#enemies.forEach((enemy) => {
       const newPath = this.buildNewPath(enemy, obstacles);
       if (newPath && newPath.length > 0) {
         if (
@@ -139,11 +137,10 @@ export class EnemyManager {
   }
 
   public removeDeadEnemies(): void {
-    this.enemies = this.enemies.filter((enemy) => enemy.health > 0);
+    this.#enemies = this.#enemies.filter((enemy) => enemy.health > 0);
   }
 
-  public spawnEnemyWave(count: number): void {
-    const baseRoute = this.waypointManager.getWaypoints();
+  public spawnEnemyWave(baseRoute: IWaypoint[], count: number): void {
     for (let i = 0; i < count; i++) {
       const offsetX = i * 0.5;
       const offsetY = i * 0.25;
@@ -153,20 +150,48 @@ export class EnemyManager {
       };
 
       const enemy = new MovingEnemy(
-        `Enemy_${this.enemies.length + 1}`,
+        `Enemy_${this.#enemies.length + 1}`,
         100,
         baseRoute,
-        0.005,
+        0.01,
       );
       enemy.x = startingPoint.x;
       enemy.y = startingPoint.y;
       enemy.currentWaypoints[0] = { ...startingPoint };
 
-      this.enemies.push(enemy);
+      this.#enemies.push(enemy);
     }
   }
 
+  public draw(graphics: Phaser.GameObjects.Graphics): void {
+    this.getEnemies().forEach((enemy) => {
+      const routePixels = enemy.currentWaypoints.map((wp) =>
+        this.#gameGrid.gridToPixel(wp.x, wp.y),
+      );
+
+      // Draw enemy's route (in light green).
+      graphics.lineStyle(2, 0x00aa00, 1);
+      for (let i = routePixels.length - 1; i > 0; i--) {
+        graphics.strokeLineShape(
+          new Phaser.Geom.Line(
+            routePixels[i].pixelX,
+            routePixels[i].pixelY,
+            routePixels[i - 1].pixelX,
+            routePixels[i - 1].pixelY,
+          ),
+        );
+      }
+
+      // Draw enemy as a red circle.
+      const enemyPos = this.#gameGrid.gridToPixel(enemy.x, enemy.y);
+      graphics.fillStyle(0xff0000, 1);
+      graphics.fillCircle(enemyPos.pixelX, enemyPos.pixelY, 10);
+    });
+  }
+
   public clearEnemies(): void {
-    this.enemies = [];
+    this.#enemies = [];
   }
 }
+
+export default EnemyManager;
