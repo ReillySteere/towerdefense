@@ -6,15 +6,18 @@ interface GameState {
   fps: number;
   status: 'playing' | 'gameOver' | 'victory';
   waveNumber: number;
-  debugLogs: string[];
+  debugLogs: { id: number; message: string }[];
   setFPS: (fps: number) => void;
   setWaveNumber: (wave: number) => void;
   addDebugLog: (log: string) => void;
+  removeDebugLog: (id: number) => void;
   clearDebugLogs: () => void;
   setMoney: (money: number) => void;
   setLives: (lives: number) => void;
   setStatus: (s: GameState['status']) => void;
 }
+
+let logIdCounter = 0;
 
 export const useGameState = create<GameState>((set) => ({
   money: 15,
@@ -25,8 +28,14 @@ export const useGameState = create<GameState>((set) => ({
   status: 'playing',
   setFPS: (fps) => set({ fps }),
   setWaveNumber: (waveNumber) => set({ waveNumber }),
-  addDebugLog: (log) =>
-    set((state) => ({ debugLogs: [...state.debugLogs, log] })),
+  addDebugLog: (message) =>
+    set((state) => ({
+      debugLogs: [...state.debugLogs, { id: logIdCounter++, message }],
+    })),
+  removeDebugLog: (id) =>
+    set((state) => ({
+      debugLogs: state.debugLogs.filter((log) => log.id !== id),
+    })),
   clearDebugLogs: () => set({ debugLogs: [] }),
   setMoney: (money) => set({ money }),
   setLives: (lives) => set({ lives }),
@@ -37,3 +46,6 @@ export const useMoney = () => useGameState((s) => s.money);
 export const useLives = () => useGameState((s) => s.lives);
 export const useWaveNumber = () => useGameState((s) => s.waveNumber);
 export const useGameStatus = () => useGameState((s) => s.status);
+export const useDebugLogs = () =>
+  useGameState((s) => s.debugLogs.map((log) => log.message));
+export const useRawDebugLogs = () => useGameState((s) => s.debugLogs);

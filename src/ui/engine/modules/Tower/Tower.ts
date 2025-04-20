@@ -28,9 +28,7 @@ export class Tower {
     const dx = enemyPos.pixelX - towerPos.pixelX;
     const dy = enemyPos.pixelY - towerPos.pixelY;
     const distance = Math.hypot(dx, dy);
-    console.log(
-      `[Tower] TowerPos: (${towerPos.pixelX},${towerPos.pixelY}), EnemyPos: (${enemyPos.pixelX},${enemyPos.pixelY}), Distance: ${distance}`,
-    );
+
     return distance <= this.range;
   }
 

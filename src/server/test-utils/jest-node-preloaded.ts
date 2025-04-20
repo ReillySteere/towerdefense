@@ -1,4 +1,4 @@
-// @ts-ignore - setup script
+// @ts-expect-error - setup script
 global.self = {};
 
 global.TextEncoder = TextEncoder;

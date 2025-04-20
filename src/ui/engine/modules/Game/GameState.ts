@@ -34,7 +34,7 @@ export class GameState {
 
   private _money = 15;
   private _lives = 50;
-  private _wave = 1;
+  private _wave = 0;
   private _score = 0;
 
   // ---- listeners ----
@@ -101,7 +101,7 @@ export class GameState {
   public reset(): void {
     this._money = 15;
     this._lives = 50;
-    this._wave = 1;
+    this._wave = 0;
     this._score = 0;
     this.emit();
   }

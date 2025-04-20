@@ -1,4 +1,4 @@
-type Handler = (...args: any[]) => void;
+export type Handler = (...args: any[]) => void;
 const handlers: Record<string, Handler[]> = {};
 
 export function on(event: string, fn: Handler): () => void {
@@ -9,7 +9,6 @@ export function on(event: string, fn: Handler): () => void {
 }
 
 export function emit(event: string, ...args: any[]): void {
-  console.log(`Event emitted: ${event}`, ...args);
   handlers[event]?.forEach((h) => h(...args));
 }
 

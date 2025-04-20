@@ -6,7 +6,7 @@ import { RendererService } from '../../services/RendererService';
 import EnemyManager from '../Enemy/EnemyManager';
 import TowerManager from '../Tower/TowerManager';
 import { GameState } from './GameState';
-import { on } from 'shared/eventBus';
+import { on } from 'ui/shared/eventBus';
 
 class GameManager {
   #endWaypoint!: { x: number; y: number };
@@ -53,6 +53,7 @@ class GameManager {
   }
 
   create() {
+    console.log('[GameManager] bound eventBus handler');
     const baseRoute = this.#waypointManager.getWaypoints();
     this.#endWaypoint = baseRoute[baseRoute.length - 1];
 
@@ -72,7 +73,18 @@ class GameManager {
     });
 
     this.#scene.input?.keyboard?.on('keydown-N', () => this.startNextWave());
-    on('startNextWave', () => this.startNextWave());
+    on('startNextWave', () => {
+      console.log('[GameManager] startNextWave fired');
+      this.startNextWave();
+    });
+
+    on('pauseGame', () => {
+      this.#scene.scene.pause();
+    });
+
+    on('resumeGame', () => {
+      this.#scene.scene.resume();
+    });
   }
 
   update(timeSinceLastFrame: number, graphics: Phaser.GameObjects.Graphics) {

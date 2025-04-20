@@ -14,7 +14,7 @@ const GameStatusOverlay: React.FC = () => {
       <h1>{message}</h1>
       {/* restart button placeholder */}
     </div>,
-    document.getElementById('root-ui')!,
+    document.getElementById('root')!,
   );
 };
 
