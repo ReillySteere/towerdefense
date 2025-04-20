@@ -17,6 +17,7 @@ export class MovingEnemy {
 
   // For debugging: store the most recent re-route segment.
   public lastRerouteSegment: IWaypoint[] = [];
+  public readonly reward = 1;
 
   /**
    *

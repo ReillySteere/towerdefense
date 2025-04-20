@@ -1,20 +1,24 @@
-import { GameGrid } from '../core/GameGrid';
-import { Projectile } from '../entities/tower/Projectile';
-import { WaypointManager } from '../entities/waypoint/WaypointManager';
-import { PathPlanningService } from '../services/PathPlanningService';
-import { RendererService } from '../services/RendererService';
-import EnemyManager from './EnemyManager';
-import TowerManager from './TowerManager';
+import { GameGrid } from '../../core/GameGrid';
+import { Projectile } from '../Tower/Projectile';
+import { WaypointManager } from '../../entities/waypoint/WaypointManager';
+import { PathPlanningService } from '../../services/PathPlanningService';
+import { RendererService } from '../../services/RendererService';
+import EnemyManager from '../Enemy/EnemyManager';
+import TowerManager from '../Tower/TowerManager';
+import { GameState } from './GameState';
+import { on } from 'shared/eventBus';
 
 class GameManager {
+  #endWaypoint!: { x: number; y: number };
   #enemyManager: EnemyManager;
   #gameGrid: GameGrid;
+  #gameOverTriggered: boolean = false;
   #pathPlanningService: PathPlanningService;
   #projectiles: Projectile[] = [];
   #rendererService: RendererService;
   #scene: Phaser.Scene;
+  #state: GameState;
   #towerManager: TowerManager;
-  #waveCount: number = 1;
   #waypointManager: WaypointManager;
 
   constructor(scene: Phaser.Scene) {
@@ -27,9 +31,12 @@ class GameManager {
     this.#enemyManager = new EnemyManager({
       gameGrid: this.#gameGrid,
       pathPlanningService: this.#pathPlanningService,
+      scene,
     });
 
     this.#rendererService = new RendererService({ gameGrid: this.#gameGrid });
+
+    this.#state = GameState.getInstance();
 
     this.#towerManager = new TowerManager({
       gameGrid: this.#gameGrid,
@@ -47,6 +54,7 @@ class GameManager {
 
   create() {
     const baseRoute = this.#waypointManager.getWaypoints();
+    this.#endWaypoint = baseRoute[baseRoute.length - 1];
 
     this.#scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       const { gridX, gridY } = this.#gameGrid.pixelToGrid(pointer.x, pointer.y);
@@ -63,24 +71,27 @@ class GameManager {
       });
     });
 
-    // New wave trigger on key "N".
-    this.#scene.input?.keyboard?.on('keydown-N', () => {
-      // Spawn a new wave of enemies.
-      this.#enemyManager.spawnEnemyWave(baseRoute, 3);
-
-      // Re-route all enemies by having EnemyManager query the updated grid.
-      this.#enemyManager.reRouteAllEnemies({
-        obstacles: this.#gameGrid.getObstacles(),
-      });
-      this.#waveCount++;
-      this.#scene.events.emit('waveUpdate', this.#waveCount);
-    });
+    this.#scene.input?.keyboard?.on('keydown-N', () => this.startNextWave());
+    on('startNextWave', () => this.startNextWave());
   }
 
   update(timeSinceLastFrame: number, graphics: Phaser.GameObjects.Graphics) {
     const existingObstacles = this.#gameGrid.getObstacles();
 
     this.#enemyManager.update(timeSinceLastFrame, existingObstacles);
+
+    this.#enemyManager.getEnemies().forEach((enemy) => {
+      const reachedBase =
+        Math.abs(enemy.x - this.#endWaypoint.x) < 0.1 &&
+        Math.abs(enemy.y - this.#endWaypoint.y) < 0.1;
+
+      if (reachedBase) {
+        this.#state.decrementLives();
+        enemy.health = 0;
+        this.#scene.events.emit('livesUpdate', this.#state.lives);
+      }
+    });
+
     const newProjectiles = this.#towerManager.updateTowers(
       this.#scene.time.now,
       this.#gameGrid.cellSize,
@@ -121,6 +132,18 @@ class GameManager {
       towerManager: this.#towerManager,
       projectiles: this.#projectiles,
     });
+  }
+
+  private startNextWave() {
+    const baseRoute = this.#waypointManager.getWaypoints();
+
+    this.#enemyManager.spawnEnemyWave(baseRoute, 3);
+    this.#enemyManager.reRouteAllEnemies({
+      obstacles: this.#gameGrid.getObstacles(),
+    });
+
+    this.#state.incrementWave();
+    this.#scene.events.emit('waveUpdate', this.#state.wave);
   }
 }
 

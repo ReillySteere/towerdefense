@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { WaypointManager } from '../entities/waypoint/WaypointManager';
 import { EnemyManager, TowerManager } from '../managers';
-import { Projectile } from '../entities/tower/Projectile';
+import { Projectile } from '../modules/Tower/Projectile';
 import { GameGrid } from '../core/GameGrid';
 
 interface RendererServiceProps {

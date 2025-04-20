@@ -1,4 +1,4 @@
-import { MovingEnemy } from '../../entities/enemy/MovingEnemy';
+import { MovingEnemy } from '../Enemy/MovingEnemy';
 import { gridToPixel } from '../../utilities/GridUtils';
 
 export class Projectile {

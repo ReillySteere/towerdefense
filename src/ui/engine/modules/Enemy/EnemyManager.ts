@@ -1,10 +1,11 @@
-import { GameGrid } from '../core/GameGrid';
-import { MovingEnemy } from '../entities/enemy/MovingEnemy';
-import { IWaypoint } from '../entities/waypoint/IWaypoint';
+import { GameGrid } from '../../core/GameGrid';
+import { MovingEnemy } from './MovingEnemy';
+import { IWaypoint } from '../../entities/waypoint/IWaypoint';
+import { GameState } from 'ui/engine/modules/Game/GameState';
 import {
   PathPlanningService,
   type IGridPosition,
-} from '../services/PathPlanningService';
+} from '../../services/PathPlanningService';
 
 // Helper function to compare two routes.
 function routesAreEqual(
@@ -29,15 +30,20 @@ function routesAreEqual(
 interface EnemyManagerProps {
   gameGrid: GameGrid;
   pathPlanningService: PathPlanningService;
+  scene: Phaser.Scene;
 }
 class EnemyManager {
   #enemies: MovingEnemy[] = [];
   #gameGrid: GameGrid;
   #pathPlanningService: PathPlanningService;
+  #scene: Phaser.Scene;
+  #state: GameState;
 
-  constructor({ gameGrid, pathPlanningService }: EnemyManagerProps) {
+  constructor({ gameGrid, pathPlanningService, scene }: EnemyManagerProps) {
     this.#gameGrid = gameGrid;
     this.#pathPlanningService = pathPlanningService;
+    this.#scene = scene;
+    this.#state = GameState.getInstance();
   }
 
   public getEnemies(): MovingEnemy[] {
@@ -137,7 +143,18 @@ class EnemyManager {
   }
 
   public removeDeadEnemies(): void {
-    this.#enemies = this.#enemies.filter((enemy) => enemy.health > 0);
+    let totalReward = 0;
+    this.#enemies = this.#enemies.filter((enemy) => {
+      if (enemy.health <= 0) {
+        totalReward += enemy.reward;
+        return false; // drop from array
+      }
+      return true;
+    });
+    if (totalReward > 0) {
+      this.#state.addMoney(totalReward);
+      this.#scene.events.emit('moneyUpdate', this.#state.money);
+    }
   }
 
   public spawnEnemyWave(baseRoute: IWaypoint[], count: number): void {

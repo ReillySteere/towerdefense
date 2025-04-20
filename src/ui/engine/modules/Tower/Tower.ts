@@ -1,4 +1,4 @@
-import { MovingEnemy } from '../../entities/enemy/MovingEnemy';
+import { MovingEnemy } from '../Enemy/MovingEnemy';
 import { Projectile } from './Projectile';
 import { gridToPixel } from '../../utilities/GridUtils';
 
@@ -10,6 +10,7 @@ export class Tower {
   private lastFired: number = 0; // Timestamp when the tower last fired.
   public size: number = 20; // Tower size (20x20, same as enemy diameter).
 
+  public readonly cost = 5;
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;

@@ -1,12 +1,12 @@
-import { Tower } from '../entities/tower/Tower';
-import { GameGrid } from '../core/GameGrid';
+import { Tower } from './Tower';
+import { GameGrid } from '../../core/GameGrid';
 import {
   PathPlanningService,
   type IGridPosition,
-} from '../services/PathPlanningService';
-import { Projectile } from '../entities/tower/Projectile';
-import { IWaypoint } from '../entities/waypoint/IWaypoint';
-
+} from '../../services/PathPlanningService';
+import { Projectile } from './Projectile';
+import { IWaypoint } from '../../entities/waypoint/IWaypoint';
+import { GameState } from 'ui/engine/modules/Game/GameState';
 interface TowerManagerProps {
   gameGrid: GameGrid;
   pathPlanningService: PathPlanningService;
@@ -16,6 +16,7 @@ class TowerManager {
   #gameGrid: GameGrid;
   #pathPlanningService: PathPlanningService;
   #scene: Phaser.Scene;
+  #state: GameState;
 
   #towers: Tower[] = [];
 
@@ -23,6 +24,7 @@ class TowerManager {
     this.#gameGrid = gameGrid;
     this.#pathPlanningService = pathPlanningService;
     this.#scene = scene;
+    this.#state = GameState.getInstance();
   }
 
   /**
@@ -112,7 +114,20 @@ class TowerManager {
   }): boolean {
     const newTower = new Tower(gridX, gridY);
 
+    if (this.#state.money < newTower.cost) {
+      this.#scene.events.emit('towerPlacementFailed', {
+        reason: 'insufficientFunds',
+      });
+      this.#scene.events.emit('debugError', {
+        message: 'Insufficient funds for tower placement.',
+        source: 'TowerManager',
+      });
+      return false;
+    }
     if (!this.canPlaceTower(baseRoute, newTower)) {
+      this.#scene.events.emit('towerPlacementFailed', {
+        reason: 'invalidPlacement',
+      });
       this.#scene.events.emit('debugError', {
         message:
           'Invalid tower placement: either already placed or blocking access.',
@@ -121,11 +136,12 @@ class TowerManager {
       return false;
     }
 
-    // Mark grid cell as occupied.
+    this.#state.spendMoney(newTower.cost);
+    this.#scene.events.emit('moneyUpdate', this.#state.money);
+
     this.#gameGrid.setCellOccupancy(newTower.x, newTower.y, true);
     this.#towers.push(newTower);
 
-    // Update obstacles and notify other systems.
     const obstacles = this.getObstacleSet();
     this.#scene.events.emit('obstaclesUpdated', { obstacles });
 

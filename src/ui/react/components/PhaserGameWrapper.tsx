@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
+import { deleteHandlers, on } from 'shared/eventBus';
 import { GameScene } from 'ui/engine/scenes';
 import { useGameState } from 'ui/react/hooks/useGameState';
 
@@ -36,6 +37,9 @@ const PhaserGameWrapper: React.FC = () => {
           scene.events.removeAllListeners('updateFPS');
           scene.events.removeAllListeners('waveUpdate');
           scene.events.removeAllListeners('debugError');
+          scene.events.removeAllListeners('moneyUpdate');
+          scene.events.removeAllListeners('livesUpdate');
+          scene.events.removeAllListeners('startNextWave');
 
           // Listen for FPS update events
           scene.events.on('updateFPS', (fps: number) => {
@@ -45,6 +49,15 @@ const PhaserGameWrapper: React.FC = () => {
           scene.events.on('waveUpdate', (wave: number) => {
             useGameState.getState().setWaveNumber(wave);
           });
+
+          scene.events.on('moneyUpdate', (money: number) => {
+            useGameState.getState().setMoney(money);
+          });
+
+          scene.events.on('livesUpdate', (lives: number) => {
+            useGameState.getState().setLives(lives);
+          });
+
           // Listen for debug log events
           scene.events.on(
             'debugError',
@@ -52,6 +65,17 @@ const PhaserGameWrapper: React.FC = () => {
               useGameState.getState().addDebugLog(`${source}: ${message}`);
             },
           );
+
+          scene.events.removeAllListeners('gameOver');
+          scene.events.on('gameOver', () => {
+            useGameState.getState().setStatus('gameOver');
+          });
+
+          // (later milestone) victory:
+          scene.events.removeAllListeners('gameWon');
+          scene.events.on('gameWon', () => {
+            useGameState.getState().setStatus('victory');
+          });
         }
       };
 
@@ -61,6 +85,7 @@ const PhaserGameWrapper: React.FC = () => {
       // Cleanup on unmount
       return () => {
         if (gameRef.current) {
+          // deleteHandlers();
           gameRef.current.destroy(true);
           gameRef.current = null;
         }
