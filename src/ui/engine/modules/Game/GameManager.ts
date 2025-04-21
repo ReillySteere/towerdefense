@@ -7,6 +7,7 @@ import EnemyManager from '../Enemy/EnemyManager';
 import TowerManager from '../Tower/TowerManager';
 import { GameState } from './GameState';
 import { on } from 'ui/shared/eventBus';
+import { useGameState } from 'ui/react/hooks/useGameState';
 
 class GameManager {
   #endWaypoint!: { x: number; y: number };
@@ -38,6 +39,10 @@ class GameManager {
 
     this.#state = GameState.getInstance();
 
+    this.#state.subscribe((snapshot) => {
+      useGameState.getState().setFromSnapshot(snapshot);
+    });
+
     this.#towerManager = new TowerManager({
       gameGrid: this.#gameGrid,
       pathPlanningService: this.#pathPlanningService,
@@ -53,7 +58,9 @@ class GameManager {
   }
 
   create() {
-    console.log('[GameManager] bound eventBus handler');
+    this.#towerManager.clearAll();
+    this.#enemyManager.clearAll();
+    this.#projectiles = [];
     const baseRoute = this.#waypointManager.getWaypoints();
     this.#endWaypoint = baseRoute[baseRoute.length - 1];
 
@@ -77,14 +84,6 @@ class GameManager {
       console.log('[GameManager] startNextWave fired');
       this.startNextWave();
     });
-
-    on('pauseGame', () => {
-      this.#scene.scene.pause();
-    });
-
-    on('resumeGame', () => {
-      this.#scene.scene.resume();
-    });
   }
 
   update(timeSinceLastFrame: number, graphics: Phaser.GameObjects.Graphics) {
@@ -100,7 +99,7 @@ class GameManager {
       if (reachedBase) {
         this.#state.decrementLives();
         enemy.health = 0;
-        this.#scene.events.emit('livesUpdate', this.#state.lives);
+        this.checkVictoryOrDefeat();
       }
     });
 
@@ -137,6 +136,8 @@ class GameManager {
 
     this.#enemyManager.removeDeadEnemies();
 
+    this.checkVictoryOrDefeat();
+
     this.#rendererService.renderScene({
       graphics,
       waypointManager: this.#waypointManager,
@@ -149,13 +150,28 @@ class GameManager {
   private startNextWave() {
     const baseRoute = this.#waypointManager.getWaypoints();
 
-    this.#enemyManager.spawnEnemyWave(baseRoute, 3);
+    this.#enemyManager.spawnEnemyWave(baseRoute, 20);
     this.#enemyManager.reRouteAllEnemies({
       obstacles: this.#gameGrid.getObstacles(),
     });
 
     this.#state.incrementWave();
-    this.#scene.events.emit('waveUpdate', this.#state.wave);
+  }
+
+  private checkVictoryOrDefeat() {
+    if (!this.#gameOverTriggered && this.#state.lives <= 0) {
+      this.#gameOverTriggered = true;
+      this.#state.setStatus('gameOver');
+    }
+
+    if (
+      !this.#gameOverTriggered &&
+      this.#state.hasWon() &&
+      this.#enemyManager.getEnemies().length === 0
+    ) {
+      this.#gameOverTriggered = true;
+      this.#state.setStatus('victory');
+    }
   }
 }
 

@@ -1,45 +1,75 @@
 import { create } from 'zustand';
+import {
+  gameState,
+  type GameStateSnapshot,
+} from 'ui/engine/modules/Game/GameState';
 
-interface GameState {
+interface GameStateProps {
   money: number;
   lives: number;
-  fps: number;
-  status: 'playing' | 'gameOver' | 'victory';
   waveNumber: number;
+  status: 'playing' | 'gameOver' | 'victory';
   debugLogs: { id: number; message: string }[];
-  setFPS: (fps: number) => void;
+}
+
+interface GameStateActions {
+  setFromSnapshot: (snap: GameStateSnapshot) => void;
   setWaveNumber: (wave: number) => void;
   addDebugLog: (log: string) => void;
   removeDebugLog: (id: number) => void;
+  reset: () => void;
   clearDebugLogs: () => void;
-  setMoney: (money: number) => void;
-  setLives: (lives: number) => void;
-  setStatus: (s: GameState['status']) => void;
 }
 
+type GameState = GameStateProps & GameStateActions;
+
 let logIdCounter = 0;
+let rafHandle: number | null = null;
 
 export const useGameState = create<GameState>((set) => ({
-  money: 15,
-  lives: 50,
-  fps: 0,
-  waveNumber: 0,
+  money: gameState.money,
+  lives: gameState.lives,
+  waveNumber: gameState.wave,
+  status: gameState.status,
   debugLogs: [],
-  status: 'playing',
-  setFPS: (fps) => set({ fps }),
+
+  setFromSnapshot: (snap) => {
+    if (rafHandle !== null) cancelAnimationFrame(rafHandle);
+
+    rafHandle = requestAnimationFrame(() => {
+      set({
+        money: snap.money,
+        lives: snap.lives,
+        waveNumber: snap.wave,
+        status: snap.status,
+      });
+    });
+  },
+
   setWaveNumber: (waveNumber) => set({ waveNumber }),
+
   addDebugLog: (message) =>
     set((state) => ({
       debugLogs: [...state.debugLogs, { id: logIdCounter++, message }],
     })),
+
   removeDebugLog: (id) =>
     set((state) => ({
       debugLogs: state.debugLogs.filter((log) => log.id !== id),
     })),
+
+  reset: () => {
+    const snap = gameState.getSnapshot(); // sync with GameState singleton
+    set({
+      money: snap.money,
+      lives: snap.lives,
+      waveNumber: snap.wave,
+      status: snap.status,
+      debugLogs: [],
+    });
+  },
+
   clearDebugLogs: () => set({ debugLogs: [] }),
-  setMoney: (money) => set({ money }),
-  setLives: (lives) => set({ lives }),
-  setStatus: (status) => set({ status }),
 }));
 
 export const useMoney = () => useGameState((s) => s.money);
@@ -49,3 +79,4 @@ export const useGameStatus = () => useGameState((s) => s.status);
 export const useDebugLogs = () =>
   useGameState((s) => s.debugLogs.map((log) => log.message));
 export const useRawDebugLogs = () => useGameState((s) => s.debugLogs);
+export const useResetGameState = () => useGameState((s) => s.reset);

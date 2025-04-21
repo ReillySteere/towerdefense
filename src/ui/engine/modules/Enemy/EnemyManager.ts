@@ -206,7 +206,7 @@ class EnemyManager {
     });
   }
 
-  public clearEnemies(): void {
+  public clearAll(): void {
     this.#enemies = [];
   }
 }

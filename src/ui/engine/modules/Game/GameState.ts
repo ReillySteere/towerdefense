@@ -14,6 +14,7 @@ export interface GameStateSnapshot {
   lives: number;
   wave: number;
   score: number;
+  status: 'playing' | 'victory' | 'gameOver';
 }
 
 /**
@@ -36,6 +37,7 @@ export class GameState {
   private _lives = 50;
   private _wave = 0;
   private _score = 0;
+  private _status: GameStateSnapshot['status'] = 'playing';
 
   // ---- listeners ----
   private listeners: Set<GameStateListener> = new Set();
@@ -55,6 +57,14 @@ export class GameState {
     return this._score;
   }
 
+  get status(): GameStateSnapshot['status'] {
+    return this._status;
+  }
+
+  public setStatus(status: GameStateSnapshot['status']): void {
+    this._status = status;
+    this.emit();
+  }
   /**
    * Register a listener that will be called after *any* state change.
    * Returns an `unsubscribe` function.
@@ -97,15 +107,25 @@ export class GameState {
     this.emit();
   }
 
+  public hasWon(): boolean {
+    return this._wave >= GameState.MAX_WAVES;
+  }
+
+  public getSnapshot(): GameStateSnapshot {
+    return this.snapshot();
+  }
+
   /** Reset state to its original defaults (useful for restarting). */
   public reset(): void {
     this._money = 15;
     this._lives = 50;
     this._wave = 0;
     this._score = 0;
+    this._status = 'playing';
     this.emit();
   }
 
+  public static readonly MAX_WAVES = 15;
   // ---- helpers ----
   private emit(): void {
     const snap = this.snapshot();
@@ -118,6 +138,7 @@ export class GameState {
       lives: this._lives,
       wave: this._wave,
       score: this._score,
+      status: this._status,
     } as const;
   }
 }

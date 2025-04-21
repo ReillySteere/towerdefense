@@ -187,6 +187,10 @@ class TowerManager {
       );
     });
   }
+
+  clearAll() {
+    this.#towers = [];
+  }
 }
 
 export default TowerManager;

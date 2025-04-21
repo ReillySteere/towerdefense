@@ -1,18 +1,33 @@
 .overlay {
   position: fixed;
   inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 3rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.65);
-  font-size: 3rem;
-  color: #fff;
+  justify-content: center;
   z-index: 1000;
+  opacity: 1;
+  transition: opacity 300ms ease;
 }
 
-.start-wave-btn {
-  margin-top: 0.5rem;
+.enter {
+  opacity: 0;
+}
+.enterActive {
+  opacity: 1;
+}
+.exit {
+  opacity: 1;
+}
+.exitActive {
+  opacity: 0;
+}
+
+.overlay button {
+  margin-top: 1rem;
   padding: 0.5rem 1rem;
   font-size: 1rem;
 }

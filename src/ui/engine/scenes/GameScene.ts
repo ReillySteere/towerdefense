@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GameManager } from '../managers';
+import { gameState } from 'ui/engine/modules/Game/GameState';
 import { useGameState } from 'ui/react/hooks/useGameState';
+import { deleteHandlers, on } from 'ui/shared/eventBus';
 
 export type DebugErrorEvent = {
   message: string;
@@ -18,6 +20,15 @@ export class GameScene extends Phaser.Scene {
 
   init(): void {
     this.events.once('shutdown', this.shutdown, this);
+
+    on('restartGame', () => {
+      this.scene.restart();
+      gameState.reset();
+      useGameState.getState().reset();
+      this.#gameManager = undefined!;
+      this.events.removeAllListeners();
+      deleteHandlers();
+    });
   }
 
   preload(): void {
@@ -25,47 +36,24 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    useGameState.getState().addDebugLog('[GameScene] create() called');
+    this.#graphics = this.add.graphics();
+
     this.#gameManager = new GameManager(this);
     this.#gameManager.create();
-    this.#graphics = this.add.graphics();
-    this.cameras.main.setBackgroundColor('#242424');
 
-    this.events.on('updateFPS', (fps: number) => {
-      useGameState.getState().setFPS(fps);
-    });
-
-    this.events.on('waveUpdate', (wave: number) => {
-      useGameState.getState().setWaveNumber(wave);
-    });
-
-    this.events.on('moneyUpdate', (money: number) => {
-      useGameState.getState().setMoney(money);
-    });
-
-    this.events.on('livesUpdate', (lives: number) => {
-      useGameState.getState().setLives(lives);
-    });
-
-    this.events.on('debugError', ({ source, message }: DebugErrorEvent) => {
-      useGameState.getState().addDebugLog(`${source}: ${message}`);
-    });
-
-    this.events.on('gameOver', () => {
-      useGameState.getState().setStatus('gameOver');
-    });
-
-    this.events.on('gameWon', () => {
-      useGameState.getState().setStatus('victory');
-    });
+    this.cameras.main?.setBackgroundColor('#242424');
   }
 
   update(_time: number, delta: number): void {
     this.#gameManager.update(delta, this.#graphics);
-    const fps = Math.round(1000 / delta);
-    this.events.emit('updateFPS', fps);
   }
 
   shutdown(): void {
+    this.#graphics?.destroy();
+    this.#graphics = undefined!;
+    this.#gameManager = undefined!;
     this.events.removeAllListeners();
+    deleteHandlers();
   }
 }
