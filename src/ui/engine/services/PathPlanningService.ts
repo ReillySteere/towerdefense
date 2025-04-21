@@ -74,10 +74,11 @@ export class PathPlanningService {
       { x: 1, y: 0 },
       { x: 0, y: 1 },
       { x: -1, y: 0 },
-      { x: 1, y: -1 },
-      { x: 1, y: 1 },
-      { x: -1, y: 1 },
-      { x: -1, y: -1 },
+      // Allow diagonal movement if needed:
+      // { x: 1, y: -1 },
+      // { x: 1, y: 1 },
+      // { x: -1, y: 1 },
+      // { x: -1, y: -1 },
     ];
 
     while (openList.length > 0) {

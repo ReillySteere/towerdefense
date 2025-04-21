@@ -1,5 +1,5 @@
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
+export const CANVAS_WIDTH = 1400;
+export const CANVAS_HEIGHT = 700;
 const CELL_SIZE = 20;
 export class GameGrid {
   #grid: number[][];

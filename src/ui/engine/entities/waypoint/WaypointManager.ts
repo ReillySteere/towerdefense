@@ -6,9 +6,13 @@ export class WaypointManager {
   constructor(initialWaypoints?: IWaypoint[]) {
     // Use provided initial waypoints or default demonstration values (in integer grid coordinates)
     this.waypoints = initialWaypoints || [
-      { x: 15, y: 0 },
-      { x: 13, y: 23 },
-      { x: 25, y: 25 },
+      { x: 15, y: 1 },
+      { x: 15, y: 15 },
+      { x: 25, y: 15 },
+      { x: 25, y: 5 },
+      { x: 35, y: 5 },
+      { x: 35, y: 30 },
+      { x: 60, y: 30 },
     ];
   }
 

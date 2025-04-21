@@ -6,7 +6,7 @@ import { RendererService } from '../../services/RendererService';
 import EnemyManager from '../Enemy/EnemyManager';
 import TowerManager from '../Tower/TowerManager';
 import { GameState } from './GameState';
-import { on } from 'ui/shared/eventBus';
+import { emit } from 'ui/shared/eventBus';
 import { useGameState } from 'ui/react/hooks/useGameState';
 
 class GameManager {
@@ -73,17 +73,13 @@ class GameManager {
         gridY,
       });
 
-      this.#scene.events.emit('debugError', {
+      emit('debugError', {
         message: `Tower added at (${gridX}, ${gridY})`,
         source: 'GameManager',
       });
     });
 
     this.#scene.input?.keyboard?.on('keydown-N', () => this.startNextWave());
-    on('startNextWave', () => {
-      console.log('[GameManager] startNextWave fired');
-      this.startNextWave();
-    });
   }
 
   update(timeSinceLastFrame: number, graphics: Phaser.GameObjects.Graphics) {
@@ -147,7 +143,8 @@ class GameManager {
     });
   }
 
-  private startNextWave() {
+  public startNextWave() {
+    this.#state.incrementWave();
     const baseRoute = this.#waypointManager.getWaypoints();
 
     this.#enemyManager.spawnEnemyWave(baseRoute, 20);
@@ -155,7 +152,10 @@ class GameManager {
       obstacles: this.#gameGrid.getObstacles(),
     });
 
-    this.#state.incrementWave();
+    emit('debugError', {
+      message: `Triggered Wave: ${this.#state.wave}`,
+      source: 'GameManager',
+    });
   }
 
   private checkVictoryOrDefeat() {

@@ -1,8 +1,8 @@
-import Phaser from 'phaser';
-import { GameManager } from '../managers';
+import Phaser, { Scenes } from 'phaser';
 import { gameState } from 'ui/engine/modules/Game/GameState';
 import { useGameState } from 'ui/react/hooks/useGameState';
-import { deleteHandlers, on } from 'ui/shared/eventBus';
+import { deleteHandlers, emit, on } from 'ui/shared/eventBus';
+import GameManager from '../modules/Game/GameManager';
 
 export type DebugErrorEvent = {
   message: string;
@@ -15,19 +15,14 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'GameScene' });
-    console.log('[Phaser] GameScene constructor called');
   }
 
   init(): void {
-    this.events.once('shutdown', this.shutdown, this);
+    this.events.once(Scenes.Events.SHUTDOWN, this.shutdown, this);
+    this.events.once(Scenes.Events.DESTROY, this.shutdown, this);
 
-    on('restartGame', () => {
-      this.scene.restart();
-      gameState.reset();
-      useGameState.getState().reset();
-      this.#gameManager = undefined!;
-      this.events.removeAllListeners();
-      deleteHandlers();
+    on('startNextWave', () => {
+      this.#gameManager.startNextWave();
     });
   }
 
@@ -36,7 +31,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    useGameState.getState().addDebugLog('[GameScene] create() called');
+    gameState.reset();
+    useGameState.getState().reset();
+    emit('debugError', {
+      source: 'GameScene',
+      message: 'Created',
+    });
     this.#graphics = this.add.graphics();
 
     this.#gameManager = new GameManager(this);
@@ -50,6 +50,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    emit('debugError', {
+      source: 'GameScene',
+      message: 'Destroyed',
+    });
     this.#graphics?.destroy();
     this.#graphics = undefined!;
     this.#gameManager = undefined!;

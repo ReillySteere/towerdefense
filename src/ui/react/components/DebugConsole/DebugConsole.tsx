@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import { useRawDebugLogs, useGameState } from 'ui/react/hooks/useGameState';
 import styles from './DebugConsole.module.scss';
+import { usePhaserEvent } from 'ui/react/hooks/usePhaserEvent';
 
 const DebugConsole: React.FC = () => {
+  usePhaserEvent();
   const debugLogs = useRawDebugLogs();
   const removeLog = useGameState((s) => s.removeDebugLog);
 

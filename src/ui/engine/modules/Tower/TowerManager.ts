@@ -7,6 +7,7 @@ import {
 import { Projectile } from './Projectile';
 import { IWaypoint } from '../../entities/waypoint/IWaypoint';
 import { GameState } from 'ui/engine/modules/Game/GameState';
+import { emit } from 'ui/shared/eventBus';
 interface TowerManagerProps {
   gameGrid: GameGrid;
   pathPlanningService: PathPlanningService;
@@ -115,20 +116,18 @@ class TowerManager {
     const newTower = new Tower(gridX, gridY);
 
     if (this.#state.money < newTower.cost) {
-      this.#scene.events.emit('towerPlacementFailed', {
-        reason: 'insufficientFunds',
-      });
-      this.#scene.events.emit('debugError', {
-        message: 'Insufficient funds for tower placement.',
+      emit('debugError', {
+        message: `Insufficient funds for tower placement. Required: ${newTower.cost}, Available: ${this.#state.money}`,
         source: 'TowerManager',
       });
+
       return false;
     }
     if (!this.canPlaceTower(baseRoute, newTower)) {
       this.#scene.events.emit('towerPlacementFailed', {
         reason: 'invalidPlacement',
       });
-      this.#scene.events.emit('debugError', {
+      emit('debugError', {
         message:
           'Invalid tower placement: either already placed or blocking access.',
         source: 'TowerManager',

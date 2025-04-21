@@ -1,4 +1,4 @@
-.gameStatus {
+.container {
   display: flex;
   justify-content: space-around;
   padding: 8px;
@@ -6,4 +6,9 @@
   font-size: 14px;
   color: #ffffff;
   background-color: #333;
+  flex-direction: column;
+}
+
+.entry {
+  margin-bottom: 10px;
 }
