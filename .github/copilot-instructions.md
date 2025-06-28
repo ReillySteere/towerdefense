@@ -1,154 +1,315 @@
-# COPILOT EDITS OPERATIONAL GUIDELINES
+# COPILOT INSTRUCTIONS
 
-## PRIME DIRECTIVE
+## Code Generation Requirements
 
-    Avoid working on more than one file at a time.
-    Multiple simultaneous edits to a file will cause corruption.
-    Be chatting and teach about what you are doing while coding.
+- Avoid working on more than one file at a time.
+- Multiple simultaneous edits to a file may cause corruption.
+- Focus on one conceptual change at a time.
+- Adjust or expand in later steps if needed.
 
-## LARGE FILE & COMPLEX CHANGE PROTOCOL
+- For large files (>300 lines) or complex refactors, ALWAYS start by creating a detailed plan _before_ making any edits.
+- The plan should include:
 
-### MANDATORY PLANNING PHASE
+  - A list of all functions or sections that need modification.
+  - The order in which changes should be applied.
+  - Dependencies between changes.
+  - A suggestion to split changes across multiple sessions if needed.
 
-    When working with large files (>300 lines) or complex changes:
-    	1. ALWAYS start by creating a detailed plan BEFORE making any edits
-            2. Your plan MUST include:
-                   - All functions/sections that need modification
-                   - The order in which changes should be applied
-                   - Dependencies between changes
-                   - Estimated number of separate edits required
+- **Before/After Snippets & Explanations**:
 
-            3. Format your plan as:
+  - Always include clear before and after code snippets when proposing changes.
+  - Provide concise explanations of what changed and why.
 
-## PROPOSED EDIT PLAN
+### Confirmation and Iterative Implementation
 
-    Working with: [filename]
-    Total planned edits: [number]
+- For significant or non-trivial tasks, propose a clear execution plan and request explicit confirmation from the developer.
+- If new requirements or issues are discovered during editing, revise the plan and ask for confirmation before proceeding.
 
-### MAKING EDITS
+### NestJS Backend Considerations
 
-    - Focus on one conceptual change at a time
-    - Show clear "before" and "after" snippets when proposing changes
-    - Include concise explanations of what changed and why
-    - Always check if the edit maintains the project's coding style
+- For backend changes, follow NestJS conventions:
+  - Use decorators (e.g., `@Controller`, `@Injectable`) appropriately.
+  - Structure code into controllers, services, and modules.
+  - Maintain dependency injection patterns.
+  - Code should be modular and follow single-responsibility principle
 
-### Edit sequence:
+### TypeScript and React Patterns
 
-    1. [First specific change] - Purpose: [why]
-    2. [Second specific change] - Purpose: [why]
-    3. Do you approve this plan? I'll proceed with Edit [number] after your confirmation.
-    4. WAIT for explicit user confirmation before making ANY edits when user ok edit [number]
+- Use TypeScript interfaces/types for all props and data structures
+- Follow React best practices (hooks, functional components)
+- Use proper state management techniques
+- Components should be modular and follow single-responsibility principle
 
-### EXECUTION PHASE
+### Required Before Each Commit
 
-    - After each individual edit, clearly indicate progress:
-    	"✅ Completed edit [#] of [total]. Ready for next edit?"
-    - If you discover additional needed changes during editing:
-    - STOP and update the plan
-    - Get approval before continuing
+- Run `yarn run lint` to ensure code follows project standards
+- Ensure all tests pass by running `yarn run test` in the terminal
+- When adding new functionality, make sure you update the README
+- Make sure that the repository structure documentation is correct and accurate in the Copilot Instructions file
 
-### REFACTORING GUIDANCE
+## Development Flow
 
-    When refactoring large files:
-    - Break work into logical, independently functional chunks
-    - Ensure each intermediate state maintains functionality
-    - Consider temporary duplication as a valid interim step
-    - Always indicate the refactoring pattern being applied
-
-### RATE LIMIT AVOIDANCE
-
-    - For very large files, suggest splitting changes across multiple sessions
-    - Prioritize changes that are logically complete units
-    - Always provide clear stopping points
-
-### Accessibility
-
-    - Ensure compliance with **WCAG 2.1** AA level minimum, AAA whenever feasible.
-    - Always suggest:
-    - Labels for form fields.
-    - Proper **ARIA** roles and attributes.
-    - Adequate color contrast.
-    - Alternative texts (`alt`, `aria-label`) for media elements.
-    - Semantic HTML for clear structure.
-    - Tools like **Lighthouse** for audits.
-
-## Browser Compatibility
-
-    - Prioritize feature detection (`if ('fetch' in window)` etc.).
-        - Support latest two stable releases of major browsers:
-    - Firefox, Chrome, Edge, Safari (macOS/iOS)
-
-## HTML/SCSS Requirements
-
-    - **HTML**:
-    - Use HTML5 semantic elements (`<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<footer>`, `<search>`, etc.)
-    - Include appropriate ARIA attributes for accessibility
-    - Ensure valid markup that passes W3C validation
-    - Use responsive design practices
-    - Optimize images using modern formats (`WebP`, `AVIF`)
-    - Include `loading="lazy"` on images where applicable
-    - Generate `srcset` and `sizes` attributes for responsive images when relevant
-    - Prioritize SEO-friendly elements (`<title>`, `<meta description>`, Open Graph tags)
-
-    - **SCSS**:
-    - SCSS Modules will be co-located with React components, imported and applied via classname to react components
-    - Use Media queries for responsive design
-    - Classes should be built with "small" as the base configuration, and higher breakpoints altering the base styles
-    - Project breakpoints are small: 320px and up, medium: 768px and up, and desktop, 1024px and up
-    - Modern selectors (`:is()`, `:where()`, `:has()`)
-    - Include dark mode support with `prefers-color-scheme`
-
-## Folder Structure
-
-    Follow this structured directory layout:
-
-    project-root/
-    ├── server/                 # Backend - Contains API and all server side code - code here should be exclusively written for NestJS in TypeScript
-    ├── src/                    # Application source code - tests are co-located
-    │   ├── controllers/        # Define exposed API
-    │   ├── models/
-    |   ├── services/           # Assist with backend operations / injectable
-    │   ├── views/              # Customize data for front-end / not injectable
-    │   └── utilities/
-    ├── ui/                     # Frontend - Contains all browser-side code - contains cypress testing / react code / phaser implementation
-    |   ├── src/
-    |   |   ├── react           # UI Files / TSX - all test files are in Jest and co-located with their componets
-    |   |   ├── engine          # Game engine code for PhaserJS
-    |   |   ├── cypress         # Cypress test scripts for e2e testing
-    |   ├── dist/                   # Publicly accessible files (served by web server)
-    │   |   ├── assets/
-    │   |   │   |── css/
-    │   |   │   ├── js/
-    │   |   │   ├── images/
-    │   |   │   ├── fonts/
-    │   |   └── index.html
-    ├── shared/                 # Shared entities between both server and UI
-    ├── docs/                 # Documentation (Markdown files)
-    ├── logs/                 # Server and application logs
-
-## Documentation Requirements
-
-    - Include JSDoc comments for JavaScript/TypeScript.
-    - Document complex functions with clear examples.
-    - Maintain concise Markdown documentation.
-    - Minimum docblock info: `param`, `return`, `throws`, `author`
+- Install dependencies: `yarn install`
+- Development server: `yarn run dev`
+- Build: `yarn run build`
+- Test: `yarn run jest`
+- Lint: `yarn run eslint`
 
 ## Testing Requirements
 
-- Ensure the test suite covers all branches of the component, including every statement, function, and line.
-- Place all tests for a unit in one comprehensive file.
-- Organize related tests under a relevant `describe` block.
-- Use `@testing-library/react`, imported from `app/react/test-utils` for JSX unit testing.
-- Write tests in TypeScript (TS Version 5), and use type casting whenever you need to mock or manipulate data.
-- Use only `import`/`export` esmodule syntax. Do **not** use `require`.
-- Add `__esModule: true` **only** to objects created within `jest.mock` factory functions.
-- Only include comments that clarify complex assertions or expectations.
-- Avoid extra commentary or explanations that merely restate your mocks or the initial query.
-- Simulate and assert the behavior of **all** event handlers to confirm they trigger as expected.
+- Ensure the test suite covers every branch, statement, and function.
+- Add tests for any new functionality to avoid reducing test coverage.
+- Place all tests for a unit within one comprehensive file.
+- Organize related tests under appropriate `describe` blocks.
+- Write tests in TypeScript (TS Version 5) and use type casting when necessary.
+- Use only `import`/`export` (ES module) syntax (do not use `require`).
+- For JSX unit testing, use `@testing-library/react` imported from `app/react/test-utils`.
+- Use `describe` and `it` blocks consistently to group and name tests clearly.
+- Destructure props passed to mock components by default.
+- Prefix unused variables with an underscore (\_).
+- For mocks:
+
+  - Add `__esModule: true` only to objects created within `jest.mock` factory functions.
+  - Use a `mock` prefix when referencing mock variables inside `jest.mock()` (e.g., `mockUpdateSubmissionData`).
+
+### Event Handlers and State Assertions
+
+- Simulate and assert the behavior of all event handlers to confirm they trigger as expected.
 - Verify changes to component state and ensure correct responses to mocked external calls.
-- Jest hoists calls to `jest.mock` to the top of the file. If your factory function references variables declared later, wrap them in a function so they aren’t evaluated prematurely.
-- When referencing mock variables inside `jest.mock()`, always use a `mock` prefix (for example, `mockUpdateSubmissionData` instead of `updateSubmissionDataMock`) to ensure they are recognized and properly hoisted by Jest.
-- **Use `describe` and `it` Blocks:** For each test, use `it(...)` to keep the language consistent and clear, tests should be grouped by the target function being called which will be referenced in the describe block.
-- By default when proposing changes, destructure the props passed to mock components
-- If a variable is unused, prefix it with \_
-- Mock buttons should specify type="button"
+- Remember that Jest hoists calls to `jest.mock` to the top of the file; if the factory function references later variables, wrap them in a function to delay evaluation.
+
+## Code Review Guidelines
+
+- Ensure code readability by using clear and descriptive variable and function names.
+- Maintain code maintainability by adhering to DRY (Don't Repeat Yourself) principles and modular design.
+- Follow project conventions for file structure, naming, and formatting.
+- Review for potential edge cases and ensure proper handling of unexpected inputs.
+- Verify that all new code is covered by tests and that existing tests are not broken.
+- When evaluating code, highlight opportunities for extracting logic from the existing code base where there are signs of duplication
+
+## Error Handling
+
+- Use specific error classes to represent different types of errors.
+- Log errors consistently using the project's logging framework or utility.
+- Ensure that error messages are clear and actionable for debugging purposes.
+- Avoid exposing sensitive information in error messages.
+- Implement fallback mechanisms where appropriate to handle failures gracefully.
+
+## Performance Optimization
+
+- Avoid unnecessary re-renders in React by using `React.memo`, `useMemo`, and `useCallback` where applicable.
+- Minimize the use of heavy computations in the main thread; offload them to web workers or background processes.
+- Use lazy loading for components and assets to improve initial load times.
+- Profile and monitor performance regularly to identify bottlenecks.
+
+## Accessibility Standards
+
+- Use semantic HTML elements (e.g., `<header>`, `<main>`, `<footer>`) to improve screen reader navigation.
+- Include ARIA roles and attributes where necessary to enhance accessibility.
+- Test components with screen readers to ensure they are usable by visually impaired users.
+- Ensure sufficient color contrast for text and UI elements.
+- Provide keyboard navigation support for all interactive elements.
+
+## Clarification & Iterative Feedback
+
+- If there’s any uncertainty about the code changes, file structure, or test implications, ask clarifying questions before proceeding.
+- For example, ask if backend-specific guidelines should be applied or if additional instructions on integrating with React Query are needed.
+
+## Repository Structure
+
+checkout/
+├── .github/
+│ └── copilot-instructions.md
+├── .vscode/
+│ └── launch.json
+├── .adr-dir/
+├── .eslintcache
+├── .eslintrc.js
+├── .gitlab-ci.yml
+├── .lintstagedrc.js
+├── .npmignore
+├── .prettierignore
+├── .stylelintignore
+├── .stylelintrc.js
+├── .yarnrc
+├── babel.config.js
+├── Dockerfile
+├── jest.browser.ts
+├── jest.node.ts
+├── jest.setup.ts
+├── package.json
+├── postcss.config.js
+├── README.md
+├── tsconfig.jest.json
+├── tsconfig.json
+├── yarn-error.log
+├── config/
+├── coverage/
+├── deploy/
+├── doc/
+├── eslint-local-rules/
+├── public/
+├── src/
+│ ├── assets/
+│ ├── contexts/
+│ ├── react/
+│ │ ├── **mocks**/
+│ │ ├── components/
+│ │ ├── constants/
+│ │ ├── cookies/
+│ │ ├── formatting/
+│ │ ├── hooks/
+│ │ ├── pages/
+│ │ ├── providers/
+│ │ ├── router/
+│ │ ├── services/
+│ │ ├── store/
+│ │ ├── test-utils/
+│ │ ├── types/
+│ │ ├── utils/
+│ ├── shared/
+│ │ ├── constants/
+│ │ ├── errors/
+│ │ ├── mocks/
+│ │ ├── models/
+│ │ ├── orderMailer/
+│ │ ├── schemas/
+│ │ └── types/
+│ ├── server/
+│ │ ├── **mocks**/
+│ │ ├── constants/
+│ │ ├── controllers/
+│ │ ├── cookies/
+│ │ ├── decorators/
+│ │ ├── errors/
+│ │ ├── filters/
+│ │ ├── guards/
+│ │ ├── helpers/
+│ │ ├── interceptors/
+│ │ ├── lib/
+│ │ ├── models/
+│ │ ├── modules/
+│ │ ├── service-client/
+│ │ ├── services/
+│ │ ├── test-utils/
+│ │ └── viewModels/
+
+## Project Dependencies
+
+This section lists all dependencies currently in use by the checkout project.
+
+### Dependencies
+
+- @hookform/devtools: ~4.3.1
+- @kount/kount-web-client-sdk: ~2.2.2
+- @nestjs-modules/mailer: 2.0.2
+- @nestjs/common: ~10.2.2
+- @nestjs/core: ~10.2.2
+- @nestjs/platform-express: ~10.2.2
+- @nestjs/serve-static: ~4.0.0
+- @tanstack/react-query: ~5.48.0
+- @tanstack/react-query-devtools: ~5.48.0
+- @types/googlepay: ~0.7.6
+- @unisporkal/alliance-ui-button: ~1.0.0
+- @unisporkal/alliance-ui-checkbox: ~1.0.0
+- @unisporkal/alliance-ui-dropdown-menu: ~1.0.0
+- @unisporkal/alliance-ui-flex-box: ~1.0.0
+- @unisporkal/alliance-ui-form: ~1.0.0
+- @unisporkal/alliance-ui-icon-button: ~1.0.0
+- @unisporkal/alliance-ui-icons: ~1.0.0
+- @unisporkal/alliance-ui-image: ~1.0.0
+- @unisporkal/alliance-ui-link: ~1.0.0
+- @unisporkal/alliance-ui-modal: ~1.0.0
+- @unisporkal/alliance-ui-radio-button: ~1.0.0
+- @unisporkal/alliance-ui-radio-button-group: ~1.0.0
+- @unisporkal/alliance-ui-select: ~1.0.0
+- @unisporkal/alliance-ui-spinner: ~1.0.0
+- @unisporkal/alliance-ui-tooltip: ~1.0.0
+- @unisporkal/alliance-ui-typography: ~1.0.0
+- @unisporkal/authentication: ~1.0.0
+- @unisporkal/babel-plugin-lazy-component: ~1.0.0
+- @unisporkal/browser: ~1.0.0
+- @unisporkal/consul-client: ~1.0.0
+- @unisporkal/cookie-cutter: ~1.0.0
+- @unisporkal/customer-profile: ~1.0.0
+- @unisporkal/experiences: ~1.0.0
+- @unisporkal/federation: ~1.0.0
+- @unisporkal/ga4: ~1.0.0
+- @unisporkal/instrumentation: ~1.0.0
+- @unisporkal/localization: ~1.0.0
+- @unisporkal/nestjs-core: ~1.0.0
+- @unisporkal/nestjs-customer-profile: ~1.0.0
+- @unisporkal/nestjs-federation: ~1.0.0
+- @unisporkal/nestjs-mailer: ~1.0.0
+- @unisporkal/react-instrumentation: ~1.0.0
+- @unisporkal/react-lazy-component: ~1.0.0
+- @unisporkal/service-client: ~1.0.0
+- @unisporkal/sites: ~1.0.0
+- @unisporkal/tooltip: ~1.0.0
+- @unisporkal/tracking: ~1.0.0
+- @unisporkal/unisporkal-styles: ~1.0.0
+- @unisporkal/utilities: ~1.0.0
+- axios: ~1.1.3
+- class-transformer: ~0.5.1
+- class-validator: ~0.14.0
+- classnames: ~2.3.1
+- concurrently: ~6.3.0
+- express: ~4.18.2
+- frames-react: ~1.1.2
+- ibantools: ~4.5.1
+- intl-tel-input: ~23.0.8
+- nodemailer: ^6.10.0
+- pretty-bytes: ~6.1.1
+- react: ~18.2.0
+- react-dom: ~18.2.0
+- react-google-recaptcha: ~2.1.0
+- react-hook-form: ~7.53.0
+- react-loader-spinner: ~4.0.0
+- react-router: ~6.21.0
+- react-router-dom: ~6.21.0
+- reflect-metadata: ~0.1.13
+- rxjs: ~7.8.1
+- sanitize-html: ~2.4.0
+- ts-jest: ~29.1.2
+- uuid: ~9.0.0
+- zod: ~3.24.2
+
+### Dev Dependencies
+
+- @babel/eslint-parser: ~7.17.0
+- @module-federation/enhanced: 0.6.10
+- @nestjs/testing: ~10.2.2
+- @testing-library/dom: ~10.1.0
+- @testing-library/jest-dom: ~5.16.4
+- @testing-library/react: ~16.0.0
+- @testing-library/react-hooks: ~8.0.0
+- @testing-library/user-event: ~14.5.2
+- @types/applepayjs: ^14.0.9
+- @types/eslint: ~9.6.1
+- @types/jest: ~29.5.12
+- @types/nodemailer: ^6.4.17
+- @types/react: ~18.2.24
+- @types/spreedly-iframe-browser: ~1.0.3
+- @types/webpack-env: ~1.18.0
+- @unisporkal/babel-preset-unisporkal: ~1.0.0
+- @unisporkal/instrumentation: ~1.0.0
+- @unisporkal/linting: ~1.0.0
+- @unisporkal/webpack-config: ~1.0.0
+- babel-eslint: ~10.1.0
+- babel-jest: ~29.7.0
+- circular-dependency-plugin: ~5.2.2
+- eslint: ~8.50.0
+- eslint-plugin-local-rules: ~3.0.2
+- eslint-plugin-react-compiler: ^19.0.0-beta-6fc168f-20241025
+- husky: ~9.0.11
+- identity-obj-proxy: ~3.0.0
+- jest: ~29.7.0
+- jest-environment-jsdom: ~29.7.0
+- jest-fixed-jsdom: ^0.0.9
+- jest-mock: ~29.7.0
+- lint-staged: ~15.2.2
+- msw: ~2.7.1
+- prettier: ~2.8.3
+- stylelint: ~15.10.0
+- ts-node: ~10.9.2
+- typescript: ~5.2.2
